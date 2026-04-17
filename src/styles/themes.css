@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════════════
+   Theme system — VS Code-inspired color themes
+   Themes swap CSS variables at the :root level via [data-theme]
+   Key Tailwind utility classes are remapped to use these vars
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────── Default (Dark+) ──────────── */
+:root, [data-theme="dark"] {
+  --bg-primary:     #111827;  /* gray-900 */
+  --bg-secondary:   #1f2937;  /* gray-800 */
+  --bg-tertiary:    #374151;  /* gray-700 */
+  --bg-elevated:    #030712;  /* gray-950 */
+  --bg-accent:      #000000;  /* black */
+
+  --border-default: #374151;  /* gray-700 */
+  --border-muted:   #4b5563;  /* gray-600 */
+
+  --text-primary:   #ffffff;
+  --text-secondary: #d1d5db;  /* gray-300 */
+  --text-muted:     #9ca3af;  /* gray-400 */
+  --text-subtle:    #6b7280;  /* gray-500 */
+  --text-faint:     #4b5563;  /* gray-600 */
+
+  --accent-green:   #4ade80;
+  --accent-cyan:    #22d3ee;
+  --accent-yellow:  #facc15;
+  --accent-blue:    #60a5fa;
+  --accent-red:     #f87171;
+  --accent-orange:  #fb923c;
+  --accent-purple:  #a78bfa;
+  --accent-pink:    #f472b6;
+
+  --status-bar:     #1d4ed8;  /* blue-700 */
+}
+
+/* ──────────── Light+ ──────────── */
+[data-theme="light"] {
+  --bg-primary:     #ffffff;
+  --bg-secondary:   #f3f4f6;
+  --bg-tertiary:    #e5e7eb;
+  --bg-elevated:    #f9fafb;
+  --bg-accent:      #1f2937;
+
+  --border-default: #d1d5db;
+  --border-muted:   #9ca3af;
+
+  --text-primary:   #111827;
+  --text-secondary: #374151;
+  --text-muted:     #4b5563;
+  --text-subtle:    #6b7280;
+  --text-faint:     #9ca3af;
+
+  --accent-green:   #059669;
+  --accent-cyan:    #0891b2;
+  --accent-yellow:  #ca8a04;
+  --accent-blue:    #2563eb;
+  --accent-red:     #dc2626;
+  --accent-orange:  #ea580c;
+  --accent-purple:  #7c3aed;
+  --accent-pink:    #db2777;
+
+  --status-bar:     #2563eb;
+}
+
+/* ──────────── Monokai ──────────── */
+[data-theme="monokai"] {
+  --bg-primary:     #272822;
+  --bg-secondary:   #2d2e27;
+  --bg-tertiary:    #3e3d32;
+  --bg-elevated:    #1e1f1c;
+  --bg-accent:      #1b1c18;
+
+  --border-default: #3e3d32;
+  --border-muted:   #75715e;
+
+  --text-primary:   #f8f8f2;
+  --text-secondary: #dcdccc;
+  --text-muted:     #a6a699;
+  --text-subtle:    #75715e;
+  --text-faint:     #49483e;
+
+  --accent-green:   #a6e22e;
+  --accent-cyan:    #66d9ef;
+  --accent-yellow:  #e6db74;
+  --accent-blue:    #66d9ef;
+  --accent-red:     #f92672;
+  --accent-orange:  #fd971f;
+  --accent-purple:  #ae81ff;
+  --accent-pink:    #f92672;
+
+  --status-bar:     #75715e;
+}
+
+/* ──────────── Dracula ──────────── */
+[data-theme="dracula"] {
+  --bg-primary:     #282a36;
+  --bg-secondary:   #343746;
+  --bg-tertiary:    #44475a;
+  --bg-elevated:    #21222c;
+  --bg-accent:      #191a21;
+
+  --border-default: #44475a;
+  --border-muted:   #6272a4;
+
+  --text-primary:   #f8f8f2;
+  --text-secondary: #e0e0e0;
+  --text-muted:     #a5a8b8;
+  --text-subtle:    #6272a4;
+  --text-faint:     #44475a;
+
+  --accent-green:   #50fa7b;
+  --accent-cyan:    #8be9fd;
+  --accent-yellow:  #f1fa8c;
+  --accent-blue:    #bd93f9;
+  --accent-red:     #ff5555;
+  --accent-orange:  #ffb86c;
+  --accent-purple:  #bd93f9;
+  --accent-pink:    #ff79c6;
+
+  --status-bar:     #bd93f9;
+}
+
+/* ──────────── Solarized Dark ──────────── */
+[data-theme="solarized"] {
+  --bg-primary:     #002b36;
+  --bg-secondary:   #073642;
+  --bg-tertiary:    #094352;
+  --bg-elevated:    #001e27;
+  --bg-accent:      #00151c;
+
+  --border-default: #094352;
+  --border-muted:   #586e75;
+
+  --text-primary:   #fdf6e3;
+  --text-secondary: #eee8d5;
+  --text-muted:     #93a1a1;
+  --text-subtle:    #657b83;
+  --text-faint:     #586e75;
+
+  --accent-green:   #859900;
+  --accent-cyan:    #2aa198;
+  --accent-yellow:  #b58900;
+  --accent-blue:    #268bd2;
+  --accent-red:     #dc322f;
+  --accent-orange:  #cb4b16;
+  --accent-purple:  #6c71c4;
+  --accent-pink:    #d33682;
+
+  --status-bar:     #268bd2;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Override key Tailwind utility classes to use CSS variables
+   This makes theme switching work without refactoring components
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Backgrounds */
+.bg-gray-900  { background-color: var(--bg-primary)   !important; }
+.bg-gray-800  { background-color: var(--bg-secondary) !important; }
+.bg-gray-700  { background-color: var(--bg-tertiary)  !important; }
+.bg-gray-950  { background-color: var(--bg-elevated)  !important; }
+.bg-black     { background-color: var(--bg-accent)    !important; }
+
+/* Borders */
+.border-gray-700 { border-color: var(--border-default) !important; }
+.border-gray-600 { border-color: var(--border-muted)   !important; }
+
+/* Primary text colors */
+.text-white      { color: var(--text-primary)   !important; }
+.text-gray-300   { color: var(--text-secondary) !important; }
+.text-gray-400   { color: var(--text-muted)     !important; }
+.text-gray-500   { color: var(--text-subtle)    !important; }
+.text-gray-600   { color: var(--text-faint)     !important; }
+
+/* Accent text colors */
+.text-green-400  { color: var(--accent-green)  !important; }
+.text-cyan-400   { color: var(--accent-cyan)   !important; }
+.text-yellow-400 { color: var(--accent-yellow) !important; }
+.text-blue-400   { color: var(--accent-blue)   !important; }
+.text-red-400    { color: var(--accent-red)    !important; }
+.text-orange-400 { color: var(--accent-orange) !important; }
+.text-purple-400 { color: var(--accent-purple) !important; }
+.text-pink-400   { color: var(--accent-pink)   !important; }
+
+/* Accent backgrounds for status bar etc. */
+.bg-blue-700 { background-color: var(--status-bar) !important; }
+
+/* Font size preference */
+[data-font-size="sm"] { font-size: 13px; }
+[data-font-size="md"] { font-size: 14px; }
+[data-font-size="lg"] { font-size: 16px; }
+
+/* Disable-animations preference (overrides framer-motion too) */
+[data-animations="off"] *,
+[data-animations="off"] *::before,
+[data-animations="off"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Compact mode — tighter padding across main content cards */
+[data-compact="on"] .p-6 { padding: 1rem !important; }
+[data-compact="on"] .p-4 { padding: 0.625rem !important; }
+[data-compact="on"] .space-y-6 > * + * { margin-top: 1rem !important; }
+[data-compact="on"] .space-y-4 > * + * { margin-top: 0.625rem !important; }
+[data-compact="on"] .mb-4 { margin-bottom: 0.625rem !important; }
+[data-compact="on"] .mb-5 { margin-bottom: 0.75rem !important; }
+[data-compact="on"] .gap-4 { gap: 0.625rem !important; }
+
+/* Zen mode — hides activity bar, sidebar, tab bar, breadcrumb, status bar
+   `display: contents` on the wrapper so it does not break flex layouts of its child */
+.zen-hide { display: contents; }
+[data-zen="on"] .zen-hide { display: none !important; }
+[data-zen="on"] .zen-content { padding: 2rem 4rem !important; }

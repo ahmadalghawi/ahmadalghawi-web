@@ -1,0 +1,12 @@
+{
+  "name": "Ahmad Alghawi — Portfolio",
+  "short_name": "Ahmad A.",
+  "description": "Senior Full Stack & AI Engineer — interactive developer portfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#111827",
+  "theme_color": "#111827",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

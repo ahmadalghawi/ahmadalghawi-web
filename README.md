@@ -1,0 +1,337 @@
+<div align="center">
+
+# 💻 Portfolio 2026 — Developer Playground
+
+### A VS Code–styled portfolio built with React, TypeScript & Tailwind CSS v4
+
+[![React](https://img.shields.io/badge/React-19-61dafb?style=flat&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178c6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Vite](https://img.shields.io/badge/Vite-8-646cff?style=flat&logo=vite&logoColor=white)](https://vitejs.dev)
+[![Tailwind](https://img.shields.io/badge/Tailwind-v4-06b6d4?style=flat&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Framer Motion](https://img.shields.io/badge/Framer_Motion-12-ff0080?style=flat&logo=framer&logoColor=white)](https://www.framer.com/motion)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+**[Live Demo](https://ahmad-alghawi.dev)** · **[Report Bug](https://github.com/ahmadalghawi/portfolio2026/issues)** · **[Request Feature](https://github.com/ahmadalghawi/portfolio2026/issues)**
+
+</div>
+
+---
+
+## 🎯 About
+
+**Portfolio 2026** is an open-source developer portfolio that looks and behaves like **Visual Studio Code**. Every interaction — the activity bar, tabs, sidebar panels, command palette, terminal, and status bar — is modeled after the real IDE, so visiting your portfolio feels like opening a familiar code editor.
+
+It's built to be **easily forked**: swap the data files, tweak the theme, and you have your own IDE-themed portfolio without touching component logic.
+
+> **✨ Highlights** — Fully themeable · 5 built-in themes · Real GitHub API integration · Hacker-mode Konami easter egg · Command palette · Live terminal · Typing sounds · Zen & Compact modes · Zero backend required
+
+---
+
+## 📸 Preview
+
+<div align="center">
+
+> _Add your own screenshots/GIFs here_
+
+| Desktop (Dark+) | Source Control (live GitHub) | Hacker Mode (Konami) |
+|:---:|:---:|:---:|
+| ![preview](./doc/images/preview-dark.png) | ![preview](./doc/images/preview-git.png) | ![preview](./doc/images/preview-hacker.gif) |
+
+</div>
+
+---
+
+## ✨ Features
+
+### 🖼️ VS Code-style shell
+- **Activity Bar** with Explorer, Source Control, Extensions, Terminal
+- **Sidebar panels** that swap content based on the active icon
+- **Tabs, Status Bar, Problems Panel** — all themed
+- **Zen Mode** hides chrome for distraction-free reading
+
+### 🎨 Theme system
+- **5 built-in themes** — Dark+, Light+, Monokai, Dracula, Solarized
+- Font-size control, animation toggle, line numbers, compact mode
+- All driven by CSS variables — easy to add your own theme
+
+### 🐙 Real GitHub integration
+- Full live profile dashboard in the **Source Control** view
+- Profile header, stats grid, language breakdown with authentic GitHub colors
+- Real **activity feed** (pushes, stars, forks, PRs, releases…)
+- Sortable / searchable / filterable **repository list**
+- Cached in `sessionStorage` to respect API rate limits
+
+### ⌨️ Keyboard-first UX
+- `Ctrl+Shift+P` — **Command Palette** with fuzzy search and navigation
+- `Ctrl+,` — **Settings Modal**
+- `Ctrl+B` — Toggle sidebar
+- Full shortcut reference inside Settings
+
+### 🔊 Interactive terminal
+- Real typed commands — `help`, `about`, `skills`, `projects`, `experience`, `contact`, `now`, `clear`, `whoami`, `sudo hire-me`
+- Minimizable, dockable (bottom/right), scanline CRT overlay
+- Optional **mechanical keyboard typing sounds** via Web Audio API
+
+### 🕹️ Easter eggs
+- **Konami code** (`↑ ↑ ↓ ↓ ← → ← → B A`) triggers a cinematic 12-second hacker-mode animation with matrix rain, intrusion log, progress bars, and an "ACCESS GRANTED" reveal
+- Secret command `matrix` in the terminal
+- Hidden `sudo hire-me` response
+
+### 📱 Responsive & accessible
+- Mobile drawer for the sidebar
+- Semantic HTML, ARIA labels, focus management
+- Respects `prefers-reduced-motion` via the animations toggle
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Tool |
+|---|---|
+| **Framework** | React 19 + TypeScript |
+| **Build Tool** | Vite 8 |
+| **Routing** | react-router-dom 7 |
+| **Styling** | Tailwind CSS v4 + CSS variables |
+| **Animations** | Framer Motion 12 |
+| **Icons** | lucide-react |
+| **Text FX** | react-type-animation |
+| **Audio** | Web Audio API (zero dependencies) |
+| **State** | React Context + `localStorage` |
+| **Data** | GitHub public REST API |
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- **Node.js 18+** and **npm** (or `pnpm` / `yarn`)
+
+### Installation
+
+```bash
+# 1. Clone the repo
+git clone https://github.com/ahmadalghawi/portfolio2026.git
+cd portfolio2026
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the dev server
+npm run dev
+```
+
+Open <http://localhost:5173> in your browser.
+
+### Build for production
+
+```bash
+npm run build    # outputs to dist/
+npm run preview  # preview the production build locally
+```
+
+---
+
+## 🎨 Making It Yours (fork & customize)
+
+Replacing the content is designed to take **under 10 minutes** — no component edits required.
+
+### 1. Personal info & section content
+All data lives in `src/data/`:
+
+```
+src/data/
+├── projectsData.ts        → your projects (title, description, stack, links)
+├── experienceData.ts      → work history
+├── testimonialsData.ts    → recommendations
+├── nowData.ts             → "what I'm doing now" items
+└── terminalCommands.ts    → terminal responses (about/skills/contact/…)
+```
+
+### 2. GitHub username
+Change the `USERNAME` constant in:
+
+```ts
+// src/components/GitHubProfile.tsx
+const USERNAME = 'your-github-handle';
+```
+
+### 3. Contact info
+Email, LinkedIn, GitHub, and resume links live in:
+- `src/components/sections/Contact.tsx`
+- `src/data/terminalCommands.ts`
+
+### 4. Themes & colors
+Tweak existing themes or add your own in `src/styles/themes.css` — every theme is just a block of CSS variables.
+
+### 5. SEO / meta tags
+Edit `index.html` → title, description, OG tags, favicon.
+
+---
+
+## 📂 Project Structure
+
+```
+portfolio2026/
+├── doc/                       # architecture & roadmap docs
+├── public/                    # static assets
+├── src/
+│   ├── main.tsx              # entry point
+│   ├── App.tsx               # layout shell, routes
+│   ├── components/           # UI components
+│   │   ├── ActivityBar.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── GitHubProfile.tsx # live GitHub dashboard
+│   │   ├── CommandPalette.tsx
+│   │   ├── SettingsModal.tsx
+│   │   ├── HackerMode.tsx
+│   │   └── sections/         # About, Skills, Projects, Experience, Contact
+│   ├── contexts/
+│   │   └── SettingsContext.tsx
+│   ├── hooks/
+│   │   ├── useKonami.ts
+│   │   ├── useTypingSounds.ts
+│   │   ├── useHotkeys.ts
+│   │   └── useGitHubData.ts
+│   ├── data/                 # content you customize
+│   └── styles/
+│       └── themes.css        # CSS variable themes
+└── package.json
+```
+
+📖 **For a full architecture deep-dive**, see [`doc/ARCHITECTURE.md`](./doc/ARCHITECTURE.md).
+
+---
+
+## 📜 Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start Vite dev server with HMR |
+| `npm run build` | Type-check and produce optimized production build |
+| `npm run preview` | Preview the production build locally |
+| `npm run lint` | Run ESLint across the project |
+
+---
+
+## 🌐 Deployment
+
+This project is a static SPA — deploy it anywhere.
+
+### Vercel (recommended)
+
+```bash
+npm i -g vercel
+vercel
+```
+
+### Netlify
+
+```bash
+npm run build
+npx netlify deploy --prod --dir=dist
+```
+
+### GitHub Pages
+
+```bash
+npm run build
+# Push dist/ to gh-pages branch using your preferred action/workflow
+```
+
+### Docker
+
+```dockerfile
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+```
+
+---
+
+## 🗺️ Roadmap
+
+- [x] VS Code–style shell (ActivityBar · Sidebar · Tabs · StatusBar)
+- [x] 5 built-in themes + custom settings panel
+- [x] Command Palette with fuzzy search
+- [x] Live GitHub profile dashboard
+- [x] Konami-code hacker mode
+- [x] Typing sounds via Web Audio
+- [ ] Blog panel with markdown posts
+- [ ] Firebase-backed contact form + analytics
+- [ ] AI "Ask me anything" chatbot
+- [ ] i18n (English / Arabic / French)
+- [ ] PWA / offline support
+
+📖 See [`doc/FUTURE-BACKEND.md`](./doc/FUTURE-BACKEND.md) for the Firebase integration plan.
+
+---
+
+## 🤝 Contributing
+
+Contributions, issues, and feature requests are welcome!
+
+1. **Fork** the project
+2. Create your feature branch (`git checkout -b feat/amazing-feature`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
+4. Push to the branch (`git push origin feat/amazing-feature`)
+5. Open a **Pull Request**
+
+Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+
+Before submitting, run:
+
+```bash
+npm run lint
+npx tsc --noEmit -p tsconfig.app.json
+npm run build
+```
+
+---
+
+## 📄 License
+
+Distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for more information.
+
+You're free to use this as your own portfolio — a credit link back is appreciated but not required. ❤️
+
+---
+
+## 🙏 Acknowledgments
+
+- [**Visual Studio Code**](https://code.visualstudio.com) — for the timeless UI inspiration
+- [**Tailwind CSS**](https://tailwindcss.com) — utility-first styling
+- [**Framer Motion**](https://www.framer.com/motion) — delightful animations
+- [**Lucide**](https://lucide.dev) — beautiful open-source icons
+- [**GitHub REST API**](https://docs.github.com/en/rest) — live profile data
+- Inspired by developer portfolios from [@bchiang7](https://github.com/bchiang7), [@soumyajit4419](https://github.com/soumyajit4419), and the dev-folio community
+
+---
+
+## 👤 Author
+
+**Ahmad Alghawi** — Full-Stack & AI Engineer
+
+- 🌐 Website — [ahmad-alghawi.dev](https://ahmad-alghawi.dev)
+- 💼 LinkedIn — [@ahmad-alghawi-310722197](https://www.linkedin.com/in/ahmad-alghawi-310722197/)
+- 🐙 GitHub — [@ahmadalghawi](https://github.com/ahmadalghawi)
+- 📧 Email — [Ahmadalghawi.86@gmail.com](mailto:Ahmadalghawi.86@gmail.com)
+
+---
+
+<div align="center">
+
+### ⭐ If you found this project useful, please consider giving it a star!
+
+It helps other developers discover it and motivates continued work on open-source.
+
+**Built with ☕ and way too much VS Code muscle memory.**
+
+</div>
