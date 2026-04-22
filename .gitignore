@@ -63,3 +63,8 @@ firebase-debug.log
 .agents/
 .claude/
 .windsurf/
+
+# ── Personal docs (keep public docs like ARCHITECTURE.md, FUTURE-BACKEND.md, images/) ──
+doc/CV.md
+doc/*.pdf
+doc/*.docx

@@ -168,6 +168,48 @@ Tweak existing themes or add your own in `src/styles/themes.css` — every theme
 ### 5. SEO / meta tags
 Edit `index.html` → title, description, OG tags, favicon.
 
+### 6. 🪪 The 3D Lanyard ID-card
+
+The home page features a physics-driven 3D ID card on a lanyard (built with **Three.js** + **React Three Fiber** + **Rapier**). Two assets control its look:
+
+```
+src/assets/lanyard/
+├── card.glb       ← the 3D ID-card model (geometry + texture)
+└── lanyard.png    ← the fabric band texture
+```
+
+#### Change the card face (photo / name / logo)
+
+1. Open the **online 3D editor** → <https://modelviewer.dev/editor/>
+2. Drag your `card.glb` file into the editor window
+3. In the right-hand panel, expand the `base` material
+4. Click the **Base Color Texture** slot → upload your own image (1024×1024 PNG works well)
+   - This is the "front" of the ID card — put your photo, name, title, logo, QR code, whatever
+5. Click **Export** → **glTF (.glb)** → download
+6. Replace `src/assets/lanyard/card.glb` with your new file
+7. `npm run dev` — your card is now live
+
+> **Tip** — design your card face in Figma/Photoshop as a rectangular image matching the card's aspect ratio (roughly **2:3 portrait**), then export as PNG before uploading.
+
+#### Change the lanyard strap
+
+Just open `src/assets/lanyard/lanyard.png` in any image editor and repaint — the texture tiles along the strap.
+
+#### Tweak the physics / camera
+
+All configurable in `@/src/components/Lanyard/Lanyard.tsx`:
+
+```tsx
+<Lanyard
+  position={[0, 0, 20]}      // camera distance — lower = closer
+  gravity={[0, -40, 0]}      // world gravity — make it float/sink
+  fov={20}                   // field of view
+  onCardClick={...}          // fires on a quick tap (not drag)
+/>
+```
+
+> **Note** — the `card.glb` file needs to expose three named meshes (`card`, `clip`, `clamp`) and two materials (`base`, `metal`). If you model your own card from scratch, keep those names so `Lanyard.tsx` can find them.
+
 ---
 
 ## 📂 Project Structure
@@ -179,6 +221,8 @@ portfolio2026/
 ├── src/
 │   ├── main.tsx              # entry point
 │   ├── App.tsx               # layout shell, routes
+│   ├── assets/
+│   │   └── lanyard/          # card.glb + lanyard.png for the 3D ID-card
 │   ├── components/           # UI components
 │   │   ├── ActivityBar.tsx
 │   │   ├── Sidebar.tsx
@@ -186,7 +230,10 @@ portfolio2026/
 │   │   ├── CommandPalette.tsx
 │   │   ├── SettingsModal.tsx
 │   │   ├── HackerMode.tsx
+│   │   ├── Lanyard/          # 3D draggable ID-card (Three.js + Rapier)
 │   │   └── sections/         # About, Skills, Projects, Experience, Contact
+│   ├── pages/
+│   │   └── CV.tsx            # standalone /cv résumé page (escapes the IDE shell)
 │   ├── contexts/
 │   │   └── SettingsContext.tsx
 │   ├── hooks/
