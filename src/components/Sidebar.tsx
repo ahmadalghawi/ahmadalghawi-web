@@ -15,7 +15,7 @@ interface FileItem {
   id: SectionId;
   path: string;
   name: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   extension: string;
 }
 

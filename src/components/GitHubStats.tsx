@@ -211,7 +211,7 @@ export default function GitHubStats() {
   );
 }
 
-function Stat({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: number }) {
+function Stat({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: number }) {
   return (
     <div className="bg-gray-900 border border-gray-700 rounded p-3 text-center">
       <Icon className="text-cyan-400 mx-auto mb-1" size={16} />

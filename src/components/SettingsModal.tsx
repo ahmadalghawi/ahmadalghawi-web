@@ -259,7 +259,7 @@ function Section({
   hint,
   children,
 }: {
-  icon?: React.ElementType;
+  icon?: React.ComponentType<{ size?: number; className?: string }>;
   title: string;
   hint?: string;
   children: React.ReactNode;
@@ -283,7 +283,7 @@ function Toggle({
   checked,
   onChange,
 }: {
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   label: string;
   hint?: string;
   checked: boolean;

@@ -17,6 +17,7 @@ import Experience from './components/sections/Experience';
 import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
 import Contact from './components/sections/Contact';
+import CV from './pages/CV';
 import type { SectionId, PanelId } from './components/Sidebar';
 import { useHotkeys } from './hooks/useHotkeys';
 import { useKonami } from './hooks/useKonami';
@@ -253,6 +254,11 @@ function App() {
     'mod+5':       (e) => { e.preventDefault(); navigate('/contact'); },
     'mod+,':       (e) => { e.preventDefault(); setSettingsOpen(true); },
   }, [navigate]);
+
+  // ── CV route escapes the VS Code shell entirely ──
+  if (location.pathname === '/cv') {
+    return <CV />;
+  }
 
   return (
     <>

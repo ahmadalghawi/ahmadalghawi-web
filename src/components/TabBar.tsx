@@ -6,7 +6,7 @@ interface Tab {
   id: SectionId;
   path: string;
   name: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties; className?: string }>;
   color: string;
   extension: string;
 }

@@ -308,7 +308,7 @@ function ActivityRow({ event }: { event: GHEvent }) {
 }
 
 interface EventMeta {
-  icon: React.ElementType;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   color: string;
   text: string;
   detail?: string;

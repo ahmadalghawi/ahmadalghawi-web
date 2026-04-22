@@ -1,12 +1,17 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, Suspense, lazy } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, FileCode, Minus, Square, X, PanelRight, PanelBottom } from 'lucide-react';
+import { Terminal, FileCode, Minus, Square, X, PanelRight, PanelBottom, IdCard, ExternalLink } from 'lucide-react';
 import { COMMANDS, LINE_DELAY_MS } from '../../data/terminalCommands';
+
+// Lazy-load the 3D Lanyard — pulls in ~1MB of deps only when needed
+const Lanyard = lazy(() => import('../Lanyard/Lanyard'));
 
 type DockPos = 'bottom' | 'right';
 type HistoryEntry = { id: number; cmd: string; output: string[]; visibleCount: number };
 
 export default function About() {
+  const navigate = useNavigate();
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [cmdHistory, setCmdHistory] = useState<string[]>([]);
@@ -117,53 +122,99 @@ export default function About() {
       animate={{ opacity: 1, y: 0 }}
       className={`space-y-6 ${dock === 'right' && !closed ? 'flex gap-6' : ''}`}
     >
-      {/* README.md card */}
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <div className="flex items-center gap-3 mb-4">
-          <FileCode className="text-blue-400" size={24} />
-          <span className="text-white text-xl font-bold">README.md</span>
+      {/* Top row — README card + Lanyard card side by side on desktop */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-stretch">
+        {/* README.md card */}
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="flex items-center gap-3 mb-4">
+            <FileCode className="text-blue-400" size={24} />
+            <span className="text-white text-xl font-bold">README.md</span>
+          </div>
+          <div className="text-green-400 space-y-4">
+            <div>
+              <span className="text-gray-500"># </span>
+              <span className="text-cyan-400 text-2xl font-bold">Ahmad Al-Ghawi</span>
+            </div>
+            <div>
+              <span className="text-gray-500">## </span>
+              <span className="text-yellow-400 text-lg">Senior Full Stack &amp; AI Engineer</span>
+            </div>
+            <div className="text-gray-300 leading-relaxed font-mono text-sm">
+              <span className="text-gray-500">```markdown</span>
+              <div className="my-1">
+                AI-driven Full Stack Engineer with 4+ years of experience<br />
+                building high-performance, scalable web and mobile applications.<br />
+                Specialized in React, Next.js, React Native, Node.js, TypeScript,<br />
+                Firebase, and AI-assisted development workflows.
+              </div>
+              <span className="text-gray-500">```</span>
+            </div>
+            <div className="grid grid-cols-2 gap-4 mt-6">
+              <div className="bg-gray-900 p-4 rounded border border-gray-600">
+                <div className="text-cyan-400 font-bold mb-2">🚀 Current Role</div>
+                <div className="text-white text-sm">Senior Full Stack & AI Engineer</div>
+                <div className="text-gray-400 text-xs mt-1">May 2025 – Present</div>
+              </div>
+              <div className="bg-gray-900 p-4 rounded border border-gray-600">
+                <div className="text-cyan-400 font-bold mb-2">💼 Experience</div>
+                <div className="text-white text-sm">4+ Years</div>
+                <div className="text-gray-400 text-xs mt-1">Web &amp; Mobile Development</div>
+              </div>
+              <div className="bg-gray-900 p-4 rounded border border-gray-600">
+                <div className="text-cyan-400 font-bold mb-2">📍 Location</div>
+                <div className="text-white text-sm">Malmö, Sweden</div>
+                <div className="text-gray-400 text-xs mt-1">073-742 14 90</div>
+              </div>
+              <div className="bg-gray-900 p-4 rounded border border-gray-600">
+                <div className="text-cyan-400 font-bold mb-2">🌐 Languages</div>
+                <div className="text-white text-sm">Arabic · English · Swedish</div>
+                <div className="text-gray-400 text-xs mt-1">Native · Fluent · Basic</div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="text-green-400 space-y-4">
-          <div>
-            <span className="text-gray-500"># </span>
-            <span className="text-cyan-400 text-2xl font-bold">Ahmad Al-Ghawi</span>
+
+        {/* Lanyard card — drag-to-swing 3D ID card + View CV CTA */}
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 overflow-hidden flex flex-col">
+          <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-700 bg-gray-900/60">
+            <IdCard className="text-cyan-400" size={16} />
+            <span className="text-white text-xs font-bold tracking-wide">id-card.lanyard</span>
+            <span className="ml-auto text-[10px] font-mono text-gray-500">click = CV · drag to swing</span>
           </div>
-          <div>
-            <span className="text-gray-500">## </span>
-            <span className="text-yellow-400 text-lg">Senior Full Stack &amp; AI Engineer</span>
+
+          {/* 3D canvas area */}
+          <div className="flex-1 min-h-[360px] relative">
+            <Suspense
+              fallback={
+                <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-xs font-mono">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+                    <span>loading 3D scene…</span>
+                  </div>
+                </div>
+              }
+            >
+              <Lanyard
+                position={[0, 0, 20]}
+                gravity={[0, -40, 0]}
+                onCardClick={() => navigate('/cv')}
+              />
+            </Suspense>
           </div>
-          <div className="text-gray-300 leading-relaxed font-mono text-sm">
-            <span className="text-gray-500">```markdown</span>
-            <div className="my-1">
-              AI-driven Full Stack Engineer with 4+ years of experience<br />
-              building high-performance, scalable web and mobile applications.<br />
-              Specialized in React, Next.js, React Native, Node.js, TypeScript,<br />
-              Firebase, and AI-assisted development workflows.
+
+          {/* View CV CTA */}
+          <Link
+            to="/cv"
+            className="group flex items-center justify-between gap-2 px-4 py-3 border-t border-gray-700 bg-gray-900/80 hover:bg-cyan-500/10 transition-colors"
+          >
+            <div>
+              <div className="text-white text-sm font-semibold group-hover:text-cyan-300 transition-colors">
+                View Full CV
+              </div>
+              <div className="text-gray-500 text-[11px] font-mono">clean recruiter-ready layout</div>
             </div>
-            <span className="text-gray-500">```</span>
-          </div>
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <div className="bg-gray-900 p-4 rounded border border-gray-600">
-              <div className="text-cyan-400 font-bold mb-2">🚀 Current Role</div>
-              <div className="text-white text-sm">Senior Full Stack & AI Engineer</div>
-              <div className="text-gray-400 text-xs mt-1">May 2025 – Present</div>
-            </div>
-            <div className="bg-gray-900 p-4 rounded border border-gray-600">
-              <div className="text-cyan-400 font-bold mb-2">💼 Experience</div>
-              <div className="text-white text-sm">4+ Years</div>
-              <div className="text-gray-400 text-xs mt-1">Web &amp; Mobile Development</div>
-            </div>
-            <div className="bg-gray-900 p-4 rounded border border-gray-600">
-              <div className="text-cyan-400 font-bold mb-2">📍 Location</div>
-              <div className="text-white text-sm">Malmö, Sweden</div>
-              <div className="text-gray-400 text-xs mt-1">073-742 14 90</div>
-            </div>
-            <div className="bg-gray-900 p-4 rounded border border-gray-600">
-              <div className="text-cyan-400 font-bold mb-2">🌐 Languages</div>
-              <div className="text-white text-sm">Arabic · English · Swedish</div>
-              <div className="text-gray-400 text-xs mt-1">Native · Fluent · Basic</div>
-            </div>
-          </div>
+            <ExternalLink size={14} className="text-cyan-400 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
         </div>
       </div>
 
