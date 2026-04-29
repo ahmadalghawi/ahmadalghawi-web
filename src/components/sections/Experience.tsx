@@ -1,8 +1,15 @@
 import { motion } from 'framer-motion';
 import { Database } from 'lucide-react';
-import { experiences } from '../../data/experienceData';
+import { experiences as staticExperiences } from '../../data/experienceData';
+import { useExperience } from '../../hooks/useExperience';
+import type { Experience as ExperienceType } from '../../lib/types';
+
+const fallback: ExperienceType[] = staticExperiences.map((e, idx) => ({ ...e, order: idx }));
 
 export default function Experience() {
+  const { data } = useExperience();
+  const experiences = data && data.length > 0 ? data : fallback;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

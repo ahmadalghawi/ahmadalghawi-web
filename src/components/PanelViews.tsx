@@ -2,8 +2,23 @@ import { motion } from 'framer-motion';
 import { GitBranch, Quote, Sparkles, Terminal as TerminalIcon, Blocks, Package } from 'lucide-react';
 import GitHubProfile from './GitHubProfile';
 import FullTerminal from './FullTerminal';
-import { testimonials } from '../data/testimonialsData';
-import { nowItems, nowUpdated } from '../data/nowData';
+import { testimonials as staticTestimonials } from '../data/testimonialsData';
+import { nowItems as staticNowItems, nowUpdated as staticNowUpdated } from '../data/nowData';
+import { useTestimonials } from '../hooks/useTestimonials';
+import { useNow } from '../hooks/useNow';
+import type { Testimonial, NowItem } from '../lib/types';
+
+// Adapters: static data predates Firestore schema (no `id` / `order`)
+const fallbackTestimonials: Testimonial[] = staticTestimonials.map((t, idx) => ({
+  id: `${t.author}-${t.company}`.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+  ...t,
+  order: idx,
+}));
+const fallbackNowItems: NowItem[] = staticNowItems.map((n, idx) => ({
+  id: n.label.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+  ...n,
+  order: idx,
+}));
 
 /* ═══════════════════════════════════════════════════════════════
    SOURCE CONTROL — right main area
@@ -85,6 +100,13 @@ export function SourceControlView() {
    ═══════════════════════════════════════════════════════════════ */
 
 export function ExtensionsView() {
+  const { data: nowData } = useNow();
+  const { data: testimonialsData } = useTestimonials();
+
+  const nowItems = nowData && nowData.items.length > 0 ? nowData.items : fallbackNowItems;
+  const nowUpdated = nowData && nowData.updated ? nowData.updated : staticNowUpdated;
+  const testimonials = testimonialsData && testimonialsData.length > 0 ? testimonialsData : fallbackTestimonials;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -134,7 +156,7 @@ export function ExtensionsView() {
         <div className="grid md:grid-cols-2 gap-4">
           {testimonials.map((t, i) => (
             <motion.blockquote
-              key={i}
+              key={t.id ?? i}
               initial={{ opacity: 0, y: 8 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

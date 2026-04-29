@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Monitor, Folder, FileCode, ExternalLink } from 'lucide-react';
-import projectsData, { type Project } from '../../data/projectsData';
+import staticProjects from '../../data/projectsData';
+import { useProjects } from '../../hooks/useProjects';
+import type { Project } from '../../lib/types';
 import ProjectModal from '../ProjectModal';
 
 const filters = ['All', 'Web', 'Mobile', 'Both'] as const;
+
+// The static `projectsData` predates the Firestore schema (`order` is new).
+// Adapt it to `Project` so the component can be type-uniform across sources.
+const fallbackProjects: Project[] = staticProjects.map((p, idx) => ({ ...p, order: idx }));
 
 export default function Projects() {
   const [filter, setFilter] = useState<string>('All');
   const [selected, setSelected] = useState<Project | null>(null);
 
-  const visible = filter === 'All' ? projectsData : projectsData.filter(p => p.type === filter);
+  const { data } = useProjects();
+  // Firestore first, static fallback until seeded / while offline
+  const source: Project[] = data && data.length > 0 ? data : fallbackProjects;
+  const visible = filter === 'All' ? source : source.filter((p) => p.type === filter);
 
   return (
     <motion.div
@@ -45,7 +54,7 @@ export default function Projects() {
         {/* Project grid */}
         <div className="grid md:grid-cols-2 gap-4">
           <AnimatePresence mode="popLayout">
-            {visible.slice(0, 8).map((project, idx) => (
+            {visible.map((project, idx) => (
               <motion.div
                 key={project.id}
                 layout

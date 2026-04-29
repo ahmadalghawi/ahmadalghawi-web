@@ -1,0 +1,53 @@
+rules_version = '2';
+
+// Firestore Security Rules for portfolio2026
+//
+// Admin write access is gated on a single, hardcoded UID. This is stricter
+// than "any authenticated user" — even if another account gets created on
+// this Firebase project, they cannot write.
+//
+// Deploy: paste into Firebase Console → Firestore → Rules → Publish
+//     or: firebase deploy --only firestore:rules
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.uid == 'vRp35jjNzXf12MyPwMSgyudTZk23';
+    }
+
+    // ── Public content — world-readable, admin-writable ──────────────────
+    match /projects/{id}     { allow read: if true; allow write: if isAdmin(); }
+    match /experience/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /testimonials/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /now/{id}          { allow read: if true; allow write: if isAdmin(); }
+    match /cv/{id}           { allow read: if true; allow write: if isAdmin(); }
+    match /meta/{id}         { allow read: if true; allow write: if isAdmin(); }
+
+    // ── Messages (contact form) — anyone can submit, only admin can read ──
+    match /messages/{id} {
+      allow create: if
+        // Required fields present
+        request.resource.data.keys().hasAll(['name', 'email', 'body', 'createdAt'])
+        // Reasonable size limits to prevent abuse
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() < 200
+        && request.resource.data.email is string
+        && request.resource.data.email.size() < 200
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() < 5000
+        // Can't pre-mark as read
+        && request.resource.data.get('read', false) == false;
+
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Default deny ─────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

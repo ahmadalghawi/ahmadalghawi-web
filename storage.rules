@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules for portfolio2026
+//
+// Public read on the /projects/** path (project thumbnails shown on the site).
+// Only the admin UID can upload / overwrite / delete.
+//
+// Deploy: paste into Firebase Console → Storage → Rules → Publish
+//     or: firebase deploy --only storage
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.uid == 'vRp35jjNzXf12MyPwMSgyudTZk23';
+    }
+
+    // ── Project images ──────────────────────────────────────────────────
+    match /projects/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+                   && request.resource.size < 5 * 1024 * 1024         // 5 MB max
+                   && request.resource.contentType.matches('image/.*'); // PNG / JPG / WEBP / AVIF / GIF
+    }
+
+    // ── CV / other admin-owned assets ───────────────────────────────────
+    match /cv/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+                   && request.resource.size < 10 * 1024 * 1024;
+    }
+
+    // ── Default deny ────────────────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

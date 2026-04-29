@@ -18,6 +18,18 @@ import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
 import Contact from './components/sections/Contact';
 import CV from './pages/CV';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminProjects from './pages/admin/AdminProjects';
+import AdminExperience from './pages/admin/AdminExperience';
+import AdminTestimonials from './pages/admin/AdminTestimonials';
+import AdminNow from './pages/admin/AdminNow';
+import AdminCV from './pages/admin/AdminCV';
+import AdminMessages from './pages/admin/AdminMessages';
+import AdminSettings from './pages/admin/AdminSettings';
+import RequireAdmin from './components/admin/RequireAdmin';
+import { AdminSettingsProvider } from './contexts/AdminSettingsContext';
 import type { SectionId, PanelId } from './components/Sidebar';
 import { useHotkeys } from './hooks/useHotkeys';
 import { useKonami } from './hooks/useKonami';
@@ -246,18 +258,56 @@ function App() {
   useHotkeys({
     'mod+shift+p': (e) => { e.preventDefault(); setPaletteMode('full'); setPaletteOpen(true); },
     'mod+p':       (e) => { e.preventDefault(); setPaletteMode('files'); setPaletteOpen(true); },
-    'mod+b':       (e) => { e.preventDefault(); setSidebarCollapsed(c => !c); },
+    'mod+b':       (e) => {
+      e.preventDefault();
+      // If Zen mode is on, exit it and reveal the sidebar (CSS `.zen-hide`
+      // force-hides the sidebar otherwise, making the toggle look broken).
+      if (settings.zenMode) {
+        update('zenMode', false);
+        setSidebarCollapsed(false);
+      } else {
+        setSidebarCollapsed(c => !c);
+      }
+    },
     'mod+1':       (e) => { e.preventDefault(); navigate('/'); },
     'mod+2':       (e) => { e.preventDefault(); navigate('/experience'); },
     'mod+3':       (e) => { e.preventDefault(); navigate('/skills'); },
     'mod+4':       (e) => { e.preventDefault(); navigate('/projects'); },
     'mod+5':       (e) => { e.preventDefault(); navigate('/contact'); },
     'mod+,':       (e) => { e.preventDefault(); setSettingsOpen(true); },
-  }, [navigate]);
+  }, [navigate, settings.zenMode, update]);
 
   // ── CV route escapes the VS Code shell entirely ──
   if (location.pathname === '/cv') {
     return <CV />;
+  }
+
+  // ── Admin routes also escape the VS Code shell ──
+  if (location.pathname.startsWith('/admin')) {
+    return (
+      <Routes>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route
+          path="/admin"
+          element={
+            <AdminSettingsProvider>
+              <RequireAdmin>
+                <AdminLayout />
+              </RequireAdmin>
+            </AdminSettingsProvider>
+          }
+        >
+          <Route index element={<AdminDashboard />} />
+          <Route path="projects" element={<AdminProjects />} />
+          <Route path="experience" element={<AdminExperience />} />
+          <Route path="testimonials" element={<AdminTestimonials />} />
+          <Route path="now" element={<AdminNow />} />
+          <Route path="cv" element={<AdminCV />} />
+          <Route path="messages" element={<AdminMessages />} />
+          <Route path="settings" element={<AdminSettings />} />
+        </Route>
+      </Routes>
+    );
   }
 
   return (

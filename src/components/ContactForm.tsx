@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
+import { sendMessage } from '../lib/repositories/messages';
 
 type Status = 'idle' | 'submitting' | 'success' | 'error';
-
-const ENDPOINT = 'https://formsubmit.co/ajax/Ahmadalghawi.86@gmail.com';
 
 export default function ContactForm() {
   const [name, setName] = useState('');
@@ -23,18 +22,7 @@ export default function ContactForm() {
     setStatus('submitting');
     setErrorMsg('');
     try {
-      const res = await fetch(ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          message,
-          _subject: `Portfolio contact from ${name}`,
-          _template: 'table',
-        }),
-      });
-      if (!res.ok) throw new Error('Request failed');
+      await sendMessage({ name, email, body: message });
       setStatus('success');
       setName(''); setEmail(''); setMessage('');
     } catch (err) {

@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Monitor, ExternalLink } from 'lucide-react';
-import type { Project } from '../data/projectsData';
+import type { Project } from '../lib/types';
 
 interface ProjectModalProps {
   project: Project;

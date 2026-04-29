@@ -24,7 +24,7 @@
 
 It's built to be **easily forked**: swap the data files, tweak the theme, and you have your own IDE-themed portfolio without touching component logic.
 
-> **✨ Highlights** — Fully themeable · 5 built-in themes · Real GitHub API integration · Hacker-mode Konami easter egg · Command palette · Live terminal · Typing sounds · Zen & Compact modes · Zero backend required
+> **✨ Highlights** — Fully themeable · 5 built-in themes · Real GitHub API integration · Hacker-mode Konami easter egg · Command palette · Live terminal · Typing sounds · Zen & Compact modes · Firebase-backed CMS with admin panel
 
 ---
 
@@ -98,7 +98,8 @@ It's built to be **easily forked**: swap the data files, tweak the theme, and yo
 | **Text FX** | react-type-animation |
 | **Audio** | Web Audio API (zero dependencies) |
 | **State** | React Context + `localStorage` |
-| **Data** | GitHub public REST API |
+| **Backend** | Firebase (Firestore + Storage + Auth) |
+| **Data** | GitHub public REST API + Firestore CMS |
 
 ---
 
@@ -212,15 +213,58 @@ All configurable in `@/src/components/Lanyard/Lanyard.tsx`:
 
 ---
 
-## 📂 Project Structure
+## � Firebase CMS (optional backend)
+
+The portfolio now includes a **fullstack headless CMS** powered by **Firebase**:
+
+| Feature | Tech |
+|---|---|
+| **Database** | Firestore (collections: `projects`, `experience`, `testimonials`, `now`, `cv`, `messages`) |
+| **Storage** | Firebase Storage (project cover images) |
+| **Auth** | Firebase Auth (email/password, single-admin UID) |
+| **Public cache** | SWR with `localStorage` + 1-hour TTL |
+| **Admin panel** | `/admin` — CRUD for all collections + inbox + CV editor |
+
+### Setup
+
+1. Create a Firebase project → enable **Firestore**, **Storage**, and **Authentication** (Email/Password).
+2. Copy `.env.example` → `.env` and fill in your Firebase web-app config.
+3. Update `src/lib/firebase.ts` → set `ADMIN_UID` to your Firebase Auth user's UID.
+4. Update `firestore.rules` and `storage.rules` → replace the hardcoded UID with yours, then deploy:
+   ```bash
+   npm install -g firebase-tools
+   firebase login
+   firebase deploy --only firestore:rules,storage
+   ```
+5. Seed initial data:
+   ```bash
+   npx tsx scripts/seed.ts
+   ```
+
+### Using the admin panel
+
+1. Sign up a user in Firebase Authentication console.
+2. Go to `/admin/login` and sign in.
+3. Manage projects (with image upload), experience, testimonials, now items, CV content, and read contact-form messages.
+
+> The public site uses **SWR caching** — edits propagate automatically after the TTL, or immediately on hard refresh.
+
+---
+
+## � Project Structure
 
 ```
 portfolio2026/
 ├── doc/                       # architecture & roadmap docs
 ├── public/                    # static assets
+├── scripts/
+│   └── seed.ts               # seed Firestore from static data
+├── firestore.rules           # Firestore security rules
+├── storage.rules             # Firebase Storage rules
+├── .env.example              # Firebase config template
 ├── src/
-│   ├── main.tsx              # entry point
-│   ├── App.tsx               # layout shell, routes
+│   ├── main.tsx              # entry point (AuthProvider wrap)
+│   ├── App.tsx               # layout shell, routes, admin escape
 │   ├── assets/
 │   │   └── lanyard/          # card.glb + lanyard.png for the 3D ID-card
 │   ├── components/           # UI components
@@ -231,17 +275,39 @@ portfolio2026/
 │   │   ├── SettingsModal.tsx
 │   │   ├── HackerMode.tsx
 │   │   ├── Lanyard/          # 3D draggable ID-card (Three.js + Rapier)
-│   │   └── sections/         # About, Skills, Projects, Experience, Contact
+│   │   ├── sections/         # About, Skills, Projects, Experience, Contact
+│   │   └── admin/            # admin UI primitives + toast
 │   ├── pages/
-│   │   └── CV.tsx            # standalone /cv résumé page (escapes the IDE shell)
+│   │   ├── CV.tsx            # standalone /cv résumé page
+│   │   └── admin/            # admin CRUD pages + login + layout
 │   ├── contexts/
+│   │   ├── AuthContext.tsx   # Firebase Auth provider
 │   │   └── SettingsContext.tsx
 │   ├── hooks/
+│   │   ├── useSWR.ts         # generic stale-while-revalidate hook
+│   │   ├── useAuth.ts        # auth context consumer
+│   │   ├── useProjects.ts    # cached Firestore reads
+│   │   ├── useExperience.ts
+│   │   ├── useTestimonials.ts
+│   │   ├── useNow.ts
+│   │   ├── useCV.ts
 │   │   ├── useKonami.ts
 │   │   ├── useTypingSounds.ts
 │   │   ├── useHotkeys.ts
 │   │   └── useGitHubData.ts
-│   ├── data/                 # content you customize
+│   ├── lib/
+│   │   ├── firebase.ts       # SDK init + admin UID
+│   │   ├── cache.ts          # SWR cache helper
+│   │   ├── storage.ts        # Firebase Storage upload/delete
+│   │   ├── types.ts          # shared domain types
+│   │   └── repositories/     # Firestore CRUD per collection
+│   │       ├── projects.ts
+│   │       ├── experience.ts
+│   │       ├── testimonials.ts
+│   │       ├── now.ts
+│   │       ├── cv.ts
+│   │       └── messages.ts
+│   ├── data/                 # static fallback content
 │   └── styles/
 │       └── themes.css        # CSS variable themes
 └── package.json
@@ -311,13 +377,12 @@ COPY --from=build /app/dist /usr/share/nginx/html
 - [x] Live GitHub profile dashboard
 - [x] Konami-code hacker mode
 - [x] Typing sounds via Web Audio
+- [x] Firebase-backed CMS (Firestore + Storage + Auth + admin panel)
+- [x] Contact form with messages inbox
 - [ ] Blog panel with markdown posts
-- [ ] Firebase-backed contact form + analytics
 - [ ] AI "Ask me anything" chatbot
 - [ ] i18n (English / Arabic / French)
 - [ ] PWA / offline support
-
-📖 See [`doc/FUTURE-BACKEND.md`](./doc/FUTURE-BACKEND.md) for the Firebase integration plan.
 
 ---
 

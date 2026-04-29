@@ -16,6 +16,12 @@ out
 !.env.example
 *.local
 
+# Firebase service account keys — NEVER commit these
+*-firebase-adminsdk-*.json
+*serviceAccount*.json
+*service-account*.json
+google-credentials*.json
+
 # ── Logs ─────────────────────────────────────
 logs
 *.log
@@ -53,11 +59,17 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# ── Deployment ───────────────────────────────
+# ── Deployment / Firebase ────────────────────
 .vercel
 .netlify
 .firebase
 firebase-debug.log
+.firebaserc
+
+# ── Firestore exports / emulator data ──────────
+firestore-export-*/
+firebase-export-*/
+*.firestore_export
 
 # ── Agent / AI tooling ───────────────────────
 .agents/
