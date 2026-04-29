@@ -8,7 +8,7 @@
  * enforced by Firestore / Storage Security Rules. See firestore.rules.
  */
 import { initializeApp, getApps, type FirebaseApp } from 'firebase/app';
-import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore, type Firestore } from 'firebase/firestore';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { getAnalytics, isSupported as analyticsSupported, type Analytics } from 'firebase/analytics';
@@ -31,9 +31,15 @@ if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
 }
 
 // Guard against hot-reload double-init during dev
-export const app: FirebaseApp = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const isFirstInit = getApps().length === 0;
+export const app: FirebaseApp = isFirstInit ? initializeApp(firebaseConfig) : getApps()[0];
 
-export const db: Firestore = getFirestore(app);
+// initializeFirestore must be called exactly once; on hot-reload reuse the
+// existing instance via getFirestore. ignoreUndefinedProperties prevents
+// "Unsupported field value: undefined" errors when saving optional fields.
+export const db: Firestore = isFirstInit
+  ? initializeFirestore(app, { ignoreUndefinedProperties: true })
+  : getFirestore(app);
 export const auth: Auth = getAuth(app);
 export const storage: FirebaseStorage = getStorage(app);
 

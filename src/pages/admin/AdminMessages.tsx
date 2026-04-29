@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { getAllMessages, markRead, deleteMessage } from '../../lib/repositories/messages';
 import { pushToast } from '../../components/admin/toast-utils';
+import { ConfirmDialog } from '../../components/admin/ui';
 import type { Message } from '../../lib/types';
 
 export default function AdminMessages() {
@@ -24,6 +25,7 @@ export default function AdminMessages() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Message | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -57,11 +59,11 @@ export default function AdminMessages() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Delete this message permanently?')) return;
     setBusyId(id);
     try {
       await deleteMessage(id);
       setMessages((prev) => prev.filter((m) => m.id !== id));
+      setConfirmDelete(null);
       pushToast('success', 'Message deleted');
     } catch (err) {
       pushToast('error', (err as Error).message);
@@ -171,7 +173,7 @@ export default function AdminMessages() {
               </div>
 
               <button
-                onClick={() => handleDelete(msg.id)}
+                onClick={() => setConfirmDelete(msg)}
                 disabled={busyId === msg.id}
                 title="Delete"
                 className="shrink-0 p-1.5 rounded-md hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer bg-transparent border-none disabled:opacity-40"
@@ -182,6 +184,18 @@ export default function AdminMessages() {
           </li>
         ))}
       </ul>
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Delete message?"
+        message={
+          confirmDelete
+            ? `Permanently remove the message from ${confirmDelete.name}. This cannot be undone.`
+            : ''
+        }
+        onCancel={() => setConfirmDelete(null)}
+        onConfirm={() => { if (confirmDelete) handleDelete(confirmDelete.id); }}
+      />
     </div>
   );
 }

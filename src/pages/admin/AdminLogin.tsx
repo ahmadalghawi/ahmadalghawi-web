@@ -3,7 +3,7 @@
  * Lives outside the VS Code shell.
  */
 import { useState, type FormEvent } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Lock, Mail, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -21,8 +21,7 @@ export default function AdminLogin() {
 
   // Already signed in as admin? Skip the form.
   if (user && isAdmin) {
-    navigate(from, { replace: true });
-    return null;
+    return <Navigate to={from} replace />;
   }
 
   async function handleSubmit(e: FormEvent) {

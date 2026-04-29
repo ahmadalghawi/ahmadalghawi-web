@@ -124,9 +124,9 @@ export default function AdminDashboard() {
       <section className="mt-10">
         <h2 className="text-sm font-medium text-zinc-300 mb-3">Quick tips</h2>
         <ul className="text-sm text-zinc-500 space-y-2 list-disc list-inside">
-          <li>Edits propagate to the public site after the cache TTL (1 hour) or a hard refresh.</li>
+          <li>Edits invalidate the public cache and appear on the next page mount.</li>
           <li>Project images use Firebase Storage — uploads are scoped to <code className="text-zinc-400">projects/</code>.</li>
-          <li>Reordering uses drag-and-drop; the new order is saved as a batch write.</li>
+          <li>Reordering uses arrow buttons; the new order is persisted as a single batch write.</li>
         </ul>
       </section>
     </div>

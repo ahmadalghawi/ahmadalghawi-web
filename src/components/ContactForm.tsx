@@ -9,6 +9,7 @@ export default function ContactForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [honey, setHoney] = useState('');
   const [status, setStatus] = useState<Status>('idle');
   const [errorMsg, setErrorMsg] = useState('');
 
@@ -17,6 +18,12 @@ export default function ContactForm() {
     if (!name || !email || !message) {
       setStatus('error');
       setErrorMsg('All fields are required.');
+      return;
+    }
+    // Honeypot — bots fill hidden fields. Pretend we succeeded but don't send.
+    if (honey) {
+      setStatus('success');
+      setName(''); setEmail(''); setMessage('');
       return;
     }
     setStatus('submitting');
@@ -42,7 +49,16 @@ export default function ContactForm() {
 
       <form onSubmit={onSubmit} className="space-y-3 font-mono text-sm">
         {/* Honeypot */}
-        <input type="text" name="_honey" className="hidden" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+        <input
+          type="text"
+          name="_honey"
+          value={honey}
+          onChange={(e) => setHoney(e.target.value)}
+          className="hidden"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
 
         <div>
           <label className="block text-cyan-400 text-xs mb-1" htmlFor="cf-name">name =</label>
