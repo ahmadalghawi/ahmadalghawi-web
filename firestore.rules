@@ -26,6 +26,16 @@ service cloud.firestore {
     match /meta/{id}         { allow read: if true; allow write: if isAdmin(); }
     match /posts/{id}        { allow read: if resource.data.published == true || isAdmin(); allow write: if isAdmin(); }
 
+    // ── CV view analytics — anyone can create a view record, only admin can read ──
+    match /cv_views/{id} {
+      allow create: if
+        request.resource.data.keys().hasAll(['token', 'viewedAt'])
+        && request.resource.data.token is string
+        && request.resource.data.token.size() > 0
+        && request.resource.data.token.size() < 100;
+      allow read, delete: if isAdmin();
+    }
+
     // ── Messages (contact form) — anyone can submit, only admin can read ──
     match /messages/{id} {
       allow create: if

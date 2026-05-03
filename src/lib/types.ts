@@ -23,6 +23,12 @@ export interface Project {
   order: number;
   createdAt?: string;          // ISO timestamp after read
   updatedAt?: string;
+  /* case-study deep-dive fields (optional) */
+  caseStudy?: string;          // markdown body
+  gallery?: string[];          // image URLs
+  problem?: string;
+  outcome?: string;
+  architecture?: string;
 }
 
 export interface Experience {

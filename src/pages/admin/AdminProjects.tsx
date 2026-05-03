@@ -5,7 +5,7 @@
  * latest data; invalidates the public cache after each mutation.
  */
 import { useEffect, useState, type FormEvent } from 'react';
-import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Upload, ImageOff } from 'lucide-react';
+import { Plus, Pencil, Trash2, ArrowUp, ArrowDown, Upload, ImageOff, X, Link2 } from 'lucide-react';
 import {
   getAllProjects,
   createProject,
@@ -13,7 +13,7 @@ import {
   deleteProject,
   reorderProjects,
 } from '../../lib/repositories/projects';
-import { uploadProjectImage, deleteByPath } from '../../lib/storage';
+import { uploadProjectImage, uploadProjectGalleryImage, deleteByPath } from '../../lib/storage';
 import { invalidateCache } from '../../lib/cache';
 import type { Project } from '../../lib/types';
 import {
@@ -43,6 +43,11 @@ interface FormState {
   gitUrl: string;
   previewUrl: string;
   period: string;
+  caseStudy: string;
+  gallery: string[];
+  problem: string;
+  outcome: string;
+  architecture: string;
 }
 
 const emptyForm: FormState = {
@@ -56,6 +61,11 @@ const emptyForm: FormState = {
   gitUrl: '',
   previewUrl: '',
   period: '',
+  caseStudy: '',
+  gallery: [],
+  problem: '',
+  outcome: '',
+  architecture: '',
 };
 
 function slugify(s: string): string {
@@ -261,6 +271,8 @@ function ProjectFormModal({
   const [imagePreview, setImagePreview] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [galleryUploading, setGalleryUploading] = useState(false);
+  const [galleryUrlInput, setGalleryUrlInput] = useState('');
 
   // Reset form when modal opens
   useEffect(() => {
@@ -277,6 +289,11 @@ function ProjectFormModal({
         gitUrl: initial.gitUrl,
         previewUrl: initial.previewUrl ?? '',
         period: initial.period ?? '',
+        caseStudy: initial.caseStudy ?? '',
+        gallery: initial.gallery ?? [],
+        problem: initial.problem ?? '',
+        outcome: initial.outcome ?? '',
+        architecture: initial.architecture ?? '',
       });
       setImagePreview(initial.image);
     } else {
@@ -303,6 +320,45 @@ function ProjectFormModal({
     }
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+  }
+
+  /* ── Gallery uploads (Firebase Storage) ───────────────────────────── */
+
+  async function uploadGalleryFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    if (!form.id.trim()) {
+      pushToast('error', 'Set the project id first — gallery uploads need a folder.');
+      return;
+    }
+    setGalleryUploading(true);
+    try {
+      const uploaded: string[] = [];
+      for (const file of Array.from(files)) {
+        const { url } = await uploadProjectGalleryImage(form.id, file);
+        uploaded.push(url);
+      }
+      update('gallery', [...form.gallery, ...uploaded]);
+      pushToast('success', `Uploaded ${uploaded.length} image${uploaded.length > 1 ? 's' : ''}`);
+    } catch (err) {
+      pushToast('error', (err as Error).message ?? 'Upload failed');
+    } finally {
+      setGalleryUploading(false);
+    }
+  }
+
+  function addGalleryByUrl() {
+    const url = galleryUrlInput.trim();
+    if (!url) return;
+    if (form.gallery.includes(url)) {
+      pushToast('error', 'Already in gallery');
+      return;
+    }
+    update('gallery', [...form.gallery, url]);
+    setGalleryUrlInput('');
+  }
+
+  function removeGalleryAt(idx: number) {
+    update('gallery', form.gallery.filter((_, i) => i !== idx));
   }
 
   // Auto-derive id from title when creating
@@ -354,6 +410,11 @@ function ProjectFormModal({
         previewUrl: form.previewUrl.trim() || undefined,
         period: form.period.trim() || undefined,
         order: initial?.order ?? nextOrder,
+        caseStudy: form.caseStudy.trim() || undefined,
+        gallery: form.gallery.length > 0 ? form.gallery : undefined,
+        problem: form.problem.trim() || undefined,
+        outcome: form.outcome.trim() || undefined,
+        architecture: form.architecture.trim() || undefined,
       };
 
       if (isEdit) {
@@ -486,6 +547,109 @@ function ProjectFormModal({
             )}
           </div>
         </Field>
+
+        {/* Deep-dive fields */}
+        <Field label="Case study" hint="Markdown body rendered on the public case-study page.">
+          <Textarea
+            value={form.caseStudy}
+            onChange={(e) => update('caseStudy', e.target.value)}
+            placeholder="# Problem...## Solution...## Results..."
+            rows={6}
+          />
+        </Field>
+
+        <Field label="Gallery" hint="Upload screenshots to Firebase Storage, or paste external URLs.">
+          <div className="space-y-3">
+            {/* Thumbnail grid */}
+            {form.gallery.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {form.gallery.map((url, i) => (
+                  <div
+                    key={url}
+                    className="relative group aspect-video rounded-md overflow-hidden border border-zinc-800 bg-zinc-900"
+                  >
+                    <img src={url} alt={`gallery ${i + 1}`} className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeGalleryAt(i)}
+                      aria-label="Remove image"
+                      className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-red-600 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer border-none"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upload + URL controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              <label className="inline-flex items-center gap-2 text-sm text-zinc-300 hover:text-zinc-100 bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-md px-3 py-2 cursor-pointer transition-colors">
+                <Upload size={14} />
+                {galleryUploading ? 'Uploading…' : 'Upload images'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  disabled={galleryUploading}
+                  onChange={(e) => {
+                    uploadGalleryFiles(e.target.files);
+                    e.target.value = '';
+                  }}
+                />
+              </label>
+
+              <div className="flex items-center gap-1 flex-1 min-w-[240px]">
+                <Link2 size={14} className="text-zinc-500 shrink-0" />
+                <Input
+                  value={galleryUrlInput}
+                  onChange={(e) => setGalleryUrlInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addGalleryByUrl();
+                    }
+                  }}
+                  placeholder="https://external-image-url.png"
+                />
+                <Button type="button" variant="secondary" onClick={addGalleryByUrl}>
+                  Add
+                </Button>
+              </div>
+            </div>
+
+            {!form.id.trim() && (
+              <p className="text-[11px] text-amber-500/80">
+                Set a project id above before uploading gallery images.
+              </p>
+            )}
+          </div>
+        </Field>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Field label="Problem" hint="One-sentence challenge.">
+            <Input
+              value={form.problem}
+              onChange={(e) => update('problem', e.target.value)}
+              placeholder="Users needed real-time delivery tracking..."
+            />
+          </Field>
+          <Field label="Architecture" hint="Key stack / design choice.">
+            <Input
+              value={form.architecture}
+              onChange={(e) => update('architecture', e.target.value)}
+              placeholder="React Native + Firebase + Expo..."
+            />
+          </Field>
+          <Field label="Outcome" hint="Impact / metric.">
+            <Input
+              value={form.outcome}
+              onChange={(e) => update('outcome', e.target.value)}
+              placeholder="Reduced delivery time by 30%..."
+            />
+          </Field>
+        </div>
 
         {error && (
           <div className="text-sm text-red-400 bg-red-500/5 border border-red-500/20 rounded-md p-3">

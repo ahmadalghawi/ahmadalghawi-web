@@ -45,25 +45,38 @@ const STATIC_ROUTES = [
 ];
 
 async function main() {
-  console.log('[generate-routes] Fetching published posts…');
-  let dynamic: string[] = [];
+  console.log('[generate-routes] Fetching published posts & projects…');
+  const dynamic: string[] = [];
+
+  // Blog posts (published only)
   try {
     const q = query(collection(db, 'posts'), where('published', '==', true));
     const snap = await getDocs(q);
-    dynamic = snap.docs
+    const blog = snap.docs
       .sort((a, b) => (b.data().publishedAt?.toMillis?.() || 0) - (a.data().publishedAt?.toMillis?.() || 0))
       .map((d) => `/blog/${d.data().slug as string}`)
       .filter(Boolean);
-    console.log(`[generate-routes] ✔ ${dynamic.length} blog routes`);
+    dynamic.push(...blog);
+    console.log(`[generate-routes] ✔ ${blog.length} blog routes`);
   } catch (e) {
-    console.warn('[generate-routes] Firestore fetch failed, using empty dynamic routes:', (e as Error).message);
+    console.warn('[generate-routes] Blog fetch failed:', (e as Error).message);
+  }
+
+  // Project case-study pages (all — /projects/:id uses doc IDs)
+  try {
+    const snap = await getDocs(collection(db, 'projects'));
+    const projects = snap.docs.map((d) => `/projects/${d.id}`).filter(Boolean);
+    dynamic.push(...projects);
+    console.log(`[generate-routes] ✔ ${projects.length} project routes`);
+  } catch (e) {
+    console.warn('[generate-routes] Projects fetch failed:', (e as Error).message);
   }
 
   const payload = { static: STATIC_ROUTES, dynamic };
   const outPath = './prerender-routes.json';
   writeFileSync(outPath, JSON.stringify(payload, null, 2));
 
-  console.log(`[generate-routes] ✔ ${dynamic.length} blog + ${STATIC_ROUTES.length} static routes written to ${outPath}`);
+  console.log(`[generate-routes] ✔ ${dynamic.length} dynamic + ${STATIC_ROUTES.length} static routes written to ${outPath}`);
   process.exit(0);
 }
 

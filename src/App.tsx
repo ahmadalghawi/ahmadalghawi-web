@@ -18,6 +18,7 @@ import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
 import Blog from './components/sections/Blog';
 import BlogPost from './components/sections/BlogPost';
+import ProjectCaseStudy from './components/sections/ProjectCaseStudy';
 import Contact from './components/sections/Contact';
 import CV from './pages/CV';
 import AdminLogin from './pages/admin/AdminLogin';
@@ -37,6 +38,8 @@ import type { SectionId, PanelId } from './components/Sidebar';
 import { useHotkeys } from './hooks/useHotkeys';
 import { useKonami } from './hooks/useKonami';
 import { useTypingSounds } from './hooks/useTypingSounds';
+import { usePosts } from './hooks/usePosts';
+import { useProjects } from './hooks/useProjects';
 
 const pathToSection: Record<string, SectionId> = {
   '/': 'about',
@@ -142,6 +145,8 @@ function App() {
   const [konamiActive, setKonamiActive] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { settings, update } = useSettings();
+  const { data: posts } = usePosts();
+  const { data: projects } = useProjects();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     if (typeof window === 'undefined') return false;
     // If the user has no stored preference, default based on screen size
@@ -163,6 +168,8 @@ function App() {
 
   const activeSection: SectionId = location.pathname.startsWith('/blog')
     ? 'blog'
+    : location.pathname.startsWith('/projects/')
+    ? 'projects'
     : pathToSection[location.pathname] ?? 'about';
 
   // Build the command list for the palette
@@ -253,10 +260,26 @@ function App() {
       },
     ];
 
+    const postCommands: PaletteCommand[] = (posts ?? [])
+      .filter((p) => p.published)
+      .map((p) => ({
+        id: `post:${p.slug}`,
+        label: `Open post: ${p.title}`,
+        group: 'Content',
+        action: () => navigate(`/blog/${p.slug}`),
+      }));
+
+    const projectCommands: PaletteCommand[] = (projects ?? []).map((p) => ({
+      id: `project:${p.id}`,
+      label: `Open project: ${p.title}`,
+      group: 'Content',
+      action: () => navigate(`/projects/${p.id}`),
+    }));
+
     return paletteMode === 'files'
       ? navCommands
-      : [...navCommands, ...viewCommands, ...actionCommands, ...prefCommands];
-  }, [navigate, sidebarCollapsed, paletteMode, update]);
+      : [...navCommands, ...viewCommands, ...actionCommands, ...prefCommands, ...postCommands, ...projectCommands];
+  }, [navigate, sidebarCollapsed, paletteMode, update, posts, projects]);
 
   useKonami(() => setKonamiActive(true));
   useTypingSounds(settings.typingSounds);
@@ -404,6 +427,7 @@ function App() {
                           <Route path="/experience" element={<Experience />} />
                           <Route path="/skills" element={<Skills />} />
                           <Route path="/projects" element={<Projects />} />
+                          <Route path="/projects/:slug" element={<ProjectCaseStudy />} />
                           <Route path="/blog" element={<Blog />} />
                           <Route path="/blog/:slug" element={<BlogPost />} />
                           <Route path="/contact" element={<Contact />} />

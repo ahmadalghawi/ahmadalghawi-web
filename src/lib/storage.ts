@@ -37,6 +37,25 @@ export async function uploadProjectImage(projectId: string, file: File): Promise
 }
 
 /**
+ * Upload a gallery screenshot under /projects/{id}/gallery/{timestamp}.{ext}.
+ * Each upload gets a unique filename so multiple gallery images coexist.
+ */
+export async function uploadProjectGalleryImage(projectId: string, file: File): Promise<UploadedImage> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error(`Expected image file, got ${file.type || 'unknown'}`);
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Image too large — max 5 MB');
+  }
+
+  const path = `projects/${projectId}/gallery/${Date.now()}.${extensionOf(file)}`;
+  const objectRef = ref(storage, path);
+  await uploadBytes(objectRef, file, { contentType: file.type });
+  const url = await getDownloadURL(objectRef);
+  return { url, path };
+}
+
+/**
  * Generic upload to an arbitrary path (e.g. /cv/Resume.pdf).
  */
 export async function uploadAtPath(path: string, file: File, maxBytes = 10 * 1024 * 1024): Promise<UploadedImage> {

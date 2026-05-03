@@ -67,18 +67,20 @@ function ensureDir(fp: string) { mkdirSync(dirname(fp), { recursive: true }); }
 
 async function main() {
   const shell = readFileSync('./dist/index.html', 'utf-8');
+
+  function toIso(v: unknown): string | undefined {
+    if (!v) return undefined;
+    if (typeof v === 'object' && 'toDate' in (v as object)) return (v as { toDate: () => Date }).toDate().toISOString();
+    if (typeof v === 'string') return v;
+    return undefined;
+  }
+
   let posts: { slug: string; title: string; excerpt: string; coverImage?: string; publishedAt?: string; updatedAt?: string }[] = [];
   try {
     const q = query(collection(db,'posts'), where('published','==',true));
     const snap = await getDocs(q);
     posts = snap.docs.map(d => {
       const data = d.data();
-      function toIso(v: unknown): string | undefined {
-        if (!v) return undefined;
-        if (typeof v === 'object' && 'toDate' in (v as object)) return (v as { toDate: () => Date }).toDate().toISOString();
-        if (typeof v === 'string') return v;
-        return undefined;
-      }
       return {
         slug: String(data.slug),
         title: String(data.title),
@@ -90,8 +92,30 @@ async function main() {
     });
     console.log(`[prerender] Fetched ${posts.length} posts`);
   } catch (e) {
-    console.warn('[prerender] Firestore fetch failed, skipping dynamic routes:', (e as Error).message);
+    console.warn('[prerender] Posts fetch failed:', (e as Error).message);
   }
+
+  let projects: { id: string; title: string; description: string; image?: string; gitUrl?: string; tags?: string[]; type?: string; period?: string }[] = [];
+  try {
+    const snap = await getDocs(collection(db,'projects'));
+    projects = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        title: String(data.title ?? d.id),
+        description: String(data.description ?? ''),
+        image: data.image ? String(data.image) : undefined,
+        gitUrl: data.gitUrl ? String(data.gitUrl) : undefined,
+        tags: Array.isArray(data.tags) ? data.tags.map(String) : undefined,
+        type: data.type ? String(data.type) : undefined,
+        period: data.period ? String(data.period) : undefined,
+      };
+    });
+    console.log(`[prerender] Fetched ${projects.length} projects`);
+  } catch (e) {
+    console.warn('[prerender] Projects fetch failed:', (e as Error).message);
+  }
+
   let count = 0;
   for (const r of STATIC) {
     const fp = r.p === '/' ? './dist/index.html' : `./dist${r.p}/index.html`;
@@ -112,6 +136,21 @@ async function main() {
     });
     ensureDir(fp);
     writeFileSync(fp, injectMeta(shell, metaBlock({ title:`${p.title} — Ahmad Alghawi`, desc:p.excerpt, canonical:c, ogImage:p.coverImage, ogType:'article', jsonLd:ld })));
+    count++;
+  }
+  for (const pr of projects) {
+    const fp = `./dist/projects/${pr.id}/index.html`;
+    const c = `${BASE}/projects/${pr.id}`;
+    const ld = JSON.stringify({
+      '@context':'https://schema.org','@type':'CreativeWork',
+      name:pr.title,description:pr.description,image:pr.image,url:c,
+      codeRepository:pr.gitUrl,programmingLanguage:pr.tags,
+      author:{'@type':'Person',name:'Ahmad Alghawi'},
+      applicationCategory: pr.type === 'Mobile' ? 'MobileApplication' : 'WebApplication',
+      datePublished: pr.period?.split('–')[0]?.trim(),
+    });
+    ensureDir(fp);
+    writeFileSync(fp, injectMeta(shell, metaBlock({ title:`${pr.title} — Ahmad Alghawi`, desc:pr.description, canonical:c, ogImage:pr.image, ogType:'article', jsonLd:ld })));
     count++;
   }
   console.log(`[prerender] ✔ ${count} pages`);

@@ -125,6 +125,32 @@ export default function About() {
       animate={{ opacity: 1, y: 0 }}
       className={`space-y-6 ${dock === 'right' && !closed ? 'flex gap-6' : ''}`}
     >
+      <title>Ahmad Alghawi — Full Stack & Mobile Developer</title>
+      <meta name="description" content="Portfolio of Ahmad Alghawi, a Full Stack & Mobile Developer specializing in React, React Native, and modern web technologies." />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'WebSite',
+              name: 'Ahmad Alghawi Portfolio',
+              url: window.location.origin,
+            },
+            {
+              '@type': 'Person',
+              name: 'Ahmad Alghawi',
+              jobTitle: 'Full Stack & Mobile Developer',
+              url: window.location.origin,
+              email: 'Ahmadalghawi.86@gmail.com',
+              sameAs: [
+                'https://www.linkedin.com/in/ahmad-alghawi-310722197/',
+                'https://github.com/ahmadalghawi',
+              ],
+            },
+          ],
+        })}
+      </script>
+
       {/* Top row — README card + Lanyard card side by side on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6 items-stretch">
         {/* README.md card */}

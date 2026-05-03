@@ -4,6 +4,7 @@
 import {
   collection,
   doc,
+  getDoc,
   getDocs,
   orderBy,
   query,
@@ -15,6 +16,7 @@ import {
 import { db } from '../firebase';
 import { serializeDoc, stripId } from './_helpers';
 import type { Project } from '../types';
+import staticProjects from '../../data/projectsData';
 
 const COLL = 'projects';
 
@@ -22,6 +24,22 @@ export async function getAllProjects(): Promise<Project[]> {
   const q = query(collection(db, COLL), orderBy('order', 'asc'));
   const snap = await getDocs(q);
   return snap.docs.map((d) => serializeDoc<Project>(d.id, d.data()));
+}
+
+export async function getProjectById(id: string): Promise<Project | null> {
+  try {
+    const d = await getDoc(doc(db, COLL, id));
+    if (d.exists()) return serializeDoc<Project>(d.id, d.data());
+  } catch {
+    /* network / permissions — fall through to static */
+  }
+  // Fallback: the Firestore doc may not exist yet (unseeded), so try the
+  // built-in static project catalog. Keeps case-study URLs working out-of-box.
+  const staticMatch = staticProjects.find((p) => p.id === id);
+  if (staticMatch) {
+    return { ...staticMatch, order: staticProjects.indexOf(staticMatch) };
+  }
+  return null;
 }
 
 export async function upsertProject(project: Project): Promise<void> {

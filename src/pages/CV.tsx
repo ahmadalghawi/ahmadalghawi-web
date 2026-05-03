@@ -1,12 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, Mail, MapPin, Phone, Globe,
-  ExternalLink as LinkedIn, Code2 as GitHub, FileDown, Sparkles, FileText,
+  ExternalLink as LinkedIn, Code2 as GitHub, FileDown, Sparkles, FileText, Contact,
 } from 'lucide-react';
 import { useCV } from '../hooks/useCV';
 import { defaultCV } from '../data/defaultCV';
+import { recordCVView } from '../lib/repositories/cv';
 
 /* ═══════════════════════════════════════════════════════════════════
    CV / Resume — clean editorial layout
@@ -112,9 +113,66 @@ export default function CV() {
     requestAnimationFrame(() => requestAnimationFrame(() => window.print()));
   }, [ats, setView]);
 
+  /* ── CV view analytics (tokenized links) ── */
+  useEffect(() => {
+    const token = searchParams.get('token');
+    if (!token) return;
+    const key = `cv-viewed-${token}`;
+    if (sessionStorage.getItem(key)) return;
+    recordCVView(token)
+      .then(() => sessionStorage.setItem(key, '1'))
+      .catch(() => {});
+  }, [searchParams]);
+
+  /* ── vCard download ── */
+  const downloadVCard = useCallback(() => {
+    const h = cv.hero;
+    const vcard = [
+      'BEGIN:VCARD',
+      'VERSION:4.0',
+      `FN:${h.name}`,
+      `TITLE:${h.title}`,
+      `TEL;TYPE=CELL:${h.phone}`,
+      `EMAIL;TYPE=WORK:${h.email}`,
+      `URL:${h.portfolio}`,
+      `URL;TYPE=LinkedIn:https://${h.linkedin}`,
+      `URL;TYPE=GitHub:https://${h.github}`,
+      `ADR;TYPE=HOME:;;${h.location};;;;`,
+      'END:VCARD',
+    ].join('\r\n');
+
+    const blob = new Blob([vcard], { type: 'text/vcard;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${h.name.replace(/\s+/g, '_')}.vcf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [cv.hero]);
+
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-800 font-sans antialiased ${ats ? 'cv-ats' : ''}`}>
       <style>{PRINT_CSS}</style>
+      <title>{`${cv.hero.name} — ${cv.hero.title}`}</title>
+      <meta name="description" content={`CV / Resume of ${cv.hero.name}, ${cv.hero.title}.`} />
+      <link rel="canonical" href={`${window.location.origin}/cv`} />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: cv.hero.name,
+          jobTitle: cv.hero.title,
+          url: cv.hero.portfolio,
+          telephone: cv.hero.phone,
+          email: cv.hero.email,
+          sameAs: [
+            `https://${cv.hero.linkedin}`,
+            `https://${cv.hero.github}`,
+          ],
+        })}
+      </script>
 
       {/* Sticky top bar (hidden in print) */}
       <nav className="sticky top-0 z-20 backdrop-blur-md bg-white/80 border-b border-slate-200/70 print:hidden">
@@ -251,6 +309,15 @@ export default function CV() {
               <GitHub size={13} className="cv-contact-icon text-slate-400" />
               GitHub
             </a>
+            <button
+              onClick={downloadVCard}
+              type="button"
+              className="inline-flex items-center gap-1.5 hover:text-cyan-700 text-slate-600 transition-colors print:hidden"
+              title="Download vCard (.vcf) to add contact"
+            >
+              <Contact size={13} className="text-cyan-500" />
+              <span className="hidden sm:inline">Save contact</span>
+            </button>
           </div>
         </header>
 

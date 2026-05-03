@@ -1,10 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Monitor, Folder, FileCode, ExternalLink } from 'lucide-react';
+import { Monitor, Folder, FileCode, ExternalLink, ArrowRight } from 'lucide-react';
 import staticProjects from '../../data/projectsData';
 import { useProjects } from '../../hooks/useProjects';
 import type { Project } from '../../lib/types';
-import ProjectModal from '../ProjectModal';
 
 const filters = ['All', 'Web', 'Mobile', 'Both'] as const;
 
@@ -14,7 +14,7 @@ const fallbackProjects: Project[] = staticProjects.map((p, idx) => ({ ...p, orde
 
 export default function Projects() {
   const [filter, setFilter] = useState<string>('All');
-  const [selected, setSelected] = useState<Project | null>(null);
+  const navigate = useNavigate();
 
   const { data } = useProjects();
   // Firestore first, static fallback until seeded / while offline
@@ -63,7 +63,7 @@ export default function Projects() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: idx * 0.05 }}
                 className="bg-gray-900 border border-gray-600 rounded-lg overflow-hidden hover:border-green-400 transition-colors cursor-pointer group"
-                onClick={() => setSelected(project)}
+                onClick={() => navigate(`/projects/${project.id}`)}
               >
                 {/* Image */}
                 <div className="h-32 bg-gray-800 relative overflow-hidden">
@@ -88,7 +88,7 @@ export default function Projects() {
                         <span key={tag} className="text-xs font-mono px-1.5 py-0.5 rounded bg-gray-700 text-green-400">{tag}</span>
                       ))}
                     </div>
-                    <span className="text-gray-400 text-xs mt-1">click to expand</span>
+                    <span className="text-gray-400 text-xs mt-1 flex items-center gap-1">View case study <ArrowRight size={10} /></span>
                   </div>
                 </div>
 
@@ -135,10 +135,6 @@ export default function Projects() {
         </div>
       </div>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {selected && <ProjectModal project={selected} onClose={() => setSelected(null)} />}
-      </AnimatePresence>
     </motion.div>
   );
 }

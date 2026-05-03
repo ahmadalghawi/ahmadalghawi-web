@@ -100,6 +100,20 @@ export default function BlogPost() {
       <meta property="og:url" content={canonical} />
       {coverImage && <meta property="og:image" content={coverImage} />}
       <meta name="twitter:card" content="summary_large_image" />
+      <script type="application/ld+json">
+        {JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'Article',
+          headline: post.title,
+          description: post.excerpt,
+          author: { '@type': 'Person', name: 'Ahmad Alghawi' },
+          datePublished: post.publishedAt,
+          dateModified: post.updatedAt,
+          image: post.coverImage,
+          url: canonical,
+          publisher: { '@type': 'Person', name: 'Ahmad Alghawi' },
+        })}
+      </script>
 
       {/* Reading progress bar — width driven by CSS custom property */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-zinc-800 z-50">
