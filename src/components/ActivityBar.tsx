@@ -1,4 +1,4 @@
-import { Files, GitBranch, Settings, User, Blocks, Terminal } from 'lucide-react';
+import { Files, GitBranch, Settings, User, Blocks, Terminal, Gamepad2 } from 'lucide-react';
 
 interface ActivityBarProps {
   activePanel: string;
@@ -11,6 +11,7 @@ const topItems = [
   { id: 'git',      icon: GitBranch, label: 'Source Control' },
   { id: 'ext',      icon: Blocks,    label: 'Extensions'     },
   { id: 'terminal', icon: Terminal,  label: 'Terminal'       },
+  { id: 'games',    icon: Gamepad2,  label: 'Arcade'         },
 ];
 
 const bottomItems = [

@@ -42,7 +42,10 @@ const STATIC_ROUTES = [
   '/blog',
   '/contact',
   '/cv',
+  '/games',
 ];
+
+const GAME_ROUTES = ['/games/snake', '/games/memory-match', '/games/tetris', '/games/bug-hunt', '/games/typing-test', '/games/2048'];
 
 async function main() {
   console.log('[generate-routes] Fetching published posts & projects…');
@@ -71,6 +74,8 @@ async function main() {
   } catch (e) {
     console.warn('[generate-routes] Projects fetch failed:', (e as Error).message);
   }
+
+  dynamic.push(...GAME_ROUTES);
 
   const payload = { static: STATIC_ROUTES, dynamic };
   const outPath = './prerender-routes.json';

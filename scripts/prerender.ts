@@ -28,6 +28,13 @@ const STATIC = [
   { p:'/blog', t:'Blog — Ahmad Alghawi', d:'Articles about web development, React, Firebase, and SEO.' },
   { p:'/contact', t:'Contact — Ahmad Alghawi', d:'Get in touch for opportunities and collaborations.' },
   { p:'/cv', t:'CV — Ahmad Alghawi', d:'Full resume and curriculum vitae.' },
+  { p:'/games', t:'Arcade — Ahmad Alghawi', d:'Mini-games built into the portfolio.' },
+  { p:'/games/snake', t:'Snake — Arcade', d:'Classic retro snake game.' },
+  { p:'/games/memory-match', t:'Memory Match — Arcade', d:'Flip cards and find matching tech-stack icons.' },
+  { p:'/games/tetris', t:'Tetris — Arcade', d:'Classic falling blocks with dev-themed colours.' },
+  { p:'/games/bug-hunt', t:'Bug Hunt — Arcade', d:'Squash bugs before time runs out. Avoid features.' },
+  { p:'/games/typing-test', t:'Typing Test — Arcade', d:'How fast can you type real code? WPM + accuracy.' },
+  { p:'/games/2048', t:'2048 — Arcade', d:'Merge tiles and reach the mighty 2048.' },
 ];
 
 function metaBlock(opts: {title:string;desc:string;canonical:string;ogImage?:string;ogType?:string;jsonLd?:string}) {

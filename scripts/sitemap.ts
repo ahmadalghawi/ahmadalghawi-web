@@ -45,7 +45,7 @@ async function main() {
     } catch (e) {
       console.warn('[sitemap] Firestore fetch failed:', (e as Error).message);
     }
-    payload = { static: ['/', '/experience', '/skills', '/projects', '/blog', '/contact', '/cv'], dynamic };
+    payload = { static: ['/', '/experience', '/skills', '/projects', '/blog', '/contact', '/cv', '/games', '/games/snake', '/games/memory-match', '/games/tetris', '/games/bug-hunt', '/games/typing-test', '/games/2048'], dynamic };
   }
 
   const allRoutes = [...payload.static, ...payload.dynamic];

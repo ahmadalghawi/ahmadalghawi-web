@@ -7,9 +7,10 @@ import {
   Check, RefreshCw, Plus, Search, FileText, Quote, Sparkles, Package, Loader2,
   Trash2, SquareSplitHorizontal,
 } from 'lucide-react';
+import GamesSidebarPanel from './sections/GamesSidebarPanel';
 
 export type SectionId = 'about' | 'experience' | 'skills' | 'projects' | 'contact' | 'blog';
-export type PanelId = 'explorer' | 'git' | 'ext' | 'terminal';
+export type PanelId = 'explorer' | 'git' | 'ext' | 'terminal' | 'games';
 
 interface FileItem {
   id: SectionId;
@@ -33,6 +34,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   git:      'SOURCE CONTROL',
   ext:      'EXTENSIONS',
   terminal: 'TERMINAL',
+  games:    'ARCADE',
 };
 
 interface SidebarProps {
@@ -75,6 +77,7 @@ export default function Sidebar({ activeSection, activePanel }: SidebarProps) {
         {activePanel === 'git'      && <GitPanel activeSection={activeSection} />}
         {activePanel === 'ext'      && <ExtPanel />}
         {activePanel === 'terminal' && <TerminalPanel />}
+        {activePanel === 'games'    && <GamesSidebarPanel />}
       </div>
     </div>
   );

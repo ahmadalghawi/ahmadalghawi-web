@@ -40,6 +40,8 @@ import { useKonami } from './hooks/useKonami';
 import { useTypingSounds } from './hooks/useTypingSounds';
 import { usePosts } from './hooks/usePosts';
 import { useProjects } from './hooks/useProjects';
+import GamesPage from './pages/Games';
+import { games } from './games/registry';
 
 const pathToSection: Record<string, SectionId> = {
   '/': 'about',
@@ -276,9 +278,25 @@ function App() {
       action: () => navigate(`/projects/${p.id}`),
     }));
 
+    const gameCommands: PaletteCommand[] = [
+      {
+        id: 'games:arcade',
+        label: 'Open Arcade',
+        group: 'Games',
+        hint: 'mod+7',
+        action: () => { setActivePanel('games'); navigate('/games'); },
+      },
+      ...games.map((g) => ({
+        id: `game:${g.slug}`,
+        label: `Play ${g.name}`,
+        group: 'Games',
+        action: () => { setActivePanel('games'); navigate(`/games/${g.slug}`); },
+      })),
+    ];
+
     return paletteMode === 'files'
       ? navCommands
-      : [...navCommands, ...viewCommands, ...actionCommands, ...prefCommands, ...postCommands, ...projectCommands];
+      : [...navCommands, ...viewCommands, ...actionCommands, ...prefCommands, ...postCommands, ...projectCommands, ...gameCommands];
   }, [navigate, sidebarCollapsed, paletteMode, update, posts, projects]);
 
   useKonami(() => setKonamiActive(true));
@@ -305,6 +323,7 @@ function App() {
     'mod+4':       (e) => { e.preventDefault(); navigate('/projects'); },
     'mod+5':       (e) => { e.preventDefault(); navigate('/blog'); },
     'mod+6':       (e) => { e.preventDefault(); navigate('/contact'); },
+    'mod+7':       (e) => { e.preventDefault(); setActivePanel('games'); navigate('/games'); },
     'mod+,':       (e) => { e.preventDefault(); setSettingsOpen(true); },
   }, [navigate, settings.zenMode, update]);
 
@@ -356,8 +375,16 @@ function App() {
               onSettingsClick={() => setSettingsOpen(true)}
               onPanelChange={(p) => {
                 const panel = p as PanelId;
-                // If the clicked panel is already active and sidebar is open, collapse it.
-                // Otherwise switch to the clicked panel and ensure sidebar is open.
+                if (panel === 'games') {
+                  setActivePanel('games');
+                  setSidebarCollapsed(false);
+                  if (!location.pathname.startsWith('/games')) navigate('/games');
+                  return;
+                }
+                // Navigating away from games while on a /games/* route → go home
+                if (location.pathname.startsWith('/games')) {
+                  navigate('/');
+                }
                 if (panel === activePanel && !sidebarCollapsed) {
                   setSidebarCollapsed(true);
                 } else {
@@ -431,6 +458,7 @@ function App() {
                           <Route path="/blog" element={<Blog />} />
                           <Route path="/blog/:slug" element={<BlogPost />} />
                           <Route path="/contact" element={<Contact />} />
+                          <Route path="/games/*" element={<GamesPage />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </motion.div>
@@ -441,6 +469,10 @@ function App() {
                     ) : activePanel === 'ext' ? (
                       <motion.div key="ext" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                         <ExtensionsView />
+                      </motion.div>
+                    ) : activePanel === 'games' ? (
+                      <motion.div key="games" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <GamesPage />
                       </motion.div>
                     ) : (
                       <motion.div key="terminal" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
