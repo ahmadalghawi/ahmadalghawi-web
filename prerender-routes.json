@@ -1,0 +1,12 @@
+{
+  "static": [
+    "/",
+    "/experience",
+    "/skills",
+    "/projects",
+    "/blog",
+    "/contact",
+    "/cv"
+  ],
+  "dynamic": []
+}

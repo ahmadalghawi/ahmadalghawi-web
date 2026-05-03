@@ -25,6 +25,7 @@ import projectsData from '../src/data/projectsData';
 import { experiences } from '../src/data/experienceData';
 import { testimonials } from '../src/data/testimonialsData';
 import { nowItems, nowUpdated } from '../src/data/nowData';
+import { defaultCV } from '../src/data/defaultCV';
 
 /* ─── Env plumbing ─────────────────────────────────────────────────────── */
 
@@ -180,53 +181,11 @@ async function seedNow() {
 
 async function seedCV() {
   console.log('[seed] cv/main …');
-  // Seed the CV page doc with the same content that currently ships in src/pages/CV.tsx
-  // so the page can be flipped onto `useCV()` once Phase 4 is wired.
-  const cv = {
-    hero: {
-      name: 'Ahmad Al-Ghawi',
-      title: 'Senior Full Stack & AI Engineer',
-      location: 'Malmö, Sweden',
-      phone: '073-742 14 90',
-      email: 'Ahmadalghawi.86@gmail.com',
-      portfolio: 'ahmadalghawi.dev',
-      linkedin: 'linkedin.com/in/ahmad-alghawi-310722197',
-      github: 'github.com/ahmadalghawi',
-    },
-    summary:
-      'AI-driven Full Stack Engineer with 4+ years of experience building scalable web & mobile apps. Expert in React, Next.js, React Native, Firebase, and AI-assisted development workflows.',
-    skills: [
-      { label: 'Frontend', items: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion'] },
-      { label: 'Backend', items: ['Node.js', 'Express', 'MySQL', 'Firebase', 'REST APIs'] },
-      { label: 'Mobile', items: ['React Native', 'Expo'] },
-      { label: 'AI Tools', items: ['Cursor', 'Windsurf', 'Claude', 'ChatGPT'] },
-      { label: 'Tooling', items: ['Git', 'GitHub', 'Vercel', 'Netlify', 'Figma', 'Jira'] },
-    ],
-    experience: experiences.map((e) => ({
-      title: e.title,
-      company: e.company,
-      period: e.period,
-      location: e.location,
-      bullets: e.bullets,
-    })),
-    projects: projectsData.slice(0, 5).map((p) => ({
-      title: p.title,
-      period: p.period ?? '',
-      blurb: p.description,
-      tech: p.tags,
-    })),
-    education: [
-      { degree: 'BSc in Software Engineering', school: 'Philadelphia University', period: '2014 – 2018' },
-    ],
-    languages: [
-      { name: 'English', level: 'Professional' },
-      { name: 'Arabic', level: 'Native' },
-      { name: 'Swedish', level: 'Conversational' },
-    ],
-    interests: ['AI tooling', 'Developer experience', 'Open source', '3D web', 'Clean code'],
-    updatedAt: serverTimestamp(),
-  };
-  await setDoc(doc(db, 'cv', 'main'), cv, { merge: true });
+  await setDoc(
+    doc(db, 'cv', 'main'),
+    { ...defaultCV, updatedAt: serverTimestamp() },
+    { merge: true },
+  );
 }
 
 /* ─── Utils ────────────────────────────────────────────────────────────── */

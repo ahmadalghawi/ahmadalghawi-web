@@ -24,6 +24,7 @@ service cloud.firestore {
     match /now/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /cv/{id}           { allow read: if true; allow write: if isAdmin(); }
     match /meta/{id}         { allow read: if true; allow write: if isAdmin(); }
+    match /posts/{id}        { allow read: if resource.data.published == true || isAdmin(); allow write: if isAdmin(); }
 
     // ── Messages (contact form) — anyone can submit, only admin can read ──
     match /messages/{id} {

@@ -10,6 +10,7 @@ import {
   Sparkles,
   Inbox,
   FileText,
+  BookOpen,
   ArrowRight,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -19,6 +20,7 @@ import { useTestimonials } from '../../hooks/useTestimonials';
 import { useNow } from '../../hooks/useNow';
 import { useCV } from '../../hooks/useCV';
 import { getAllMessages } from '../../lib/repositories/messages';
+import { getAllPosts } from '../../lib/repositories/posts';
 
 interface StatCardProps {
   to: string;
@@ -56,6 +58,8 @@ export default function AdminDashboard() {
 
   const [msgCount, setMsgCount] = useState<number | null>(null);
   const [msgUnread, setMsgUnread] = useState(0);
+  const [postCount, setPostCount] = useState<number | null>(null);
+  const [postPublished, setPostPublished] = useState(0);
   useEffect(() => {
     getAllMessages()
       .then((msgs) => {
@@ -64,6 +68,14 @@ export default function AdminDashboard() {
       })
       .catch(() => {
         /* silently ignore — user will see on messages page */
+      });
+    getAllPosts()
+      .then((posts) => {
+        setPostCount(posts.length);
+        setPostPublished(posts.filter((p) => p.published).length);
+      })
+      .catch(() => {
+        /* silently ignore — user will see on blog page */
       });
   }, []);
 
@@ -118,6 +130,13 @@ export default function AdminDashboard() {
           count={msgCount ?? '—'}
           icon={Inbox}
           hint={msgUnread > 0 ? `${msgUnread} unread` : 'Contact form inbox'}
+        />
+        <StatCard
+          to="/admin/blog"
+          label="Blog Posts"
+          count={postCount ?? '—'}
+          icon={BookOpen}
+          hint={postPublished > 0 ? `${postPublished} published` : 'SEO content'}
         />
       </div>
 

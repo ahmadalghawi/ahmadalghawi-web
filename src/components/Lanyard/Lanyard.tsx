@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, extend, useFrame } from '@react-three/fiber';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import {
   BallCollider,
@@ -19,6 +19,10 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
+// Kick off asset downloads before the Canvas even mounts so they're cached
+useGLTF.preload(cardGLB as string);
+useTexture.preload(lanyard as string);
+
 interface LanyardProps {
   position?: [number, number, number];
   gravity?: [number, number, number];
@@ -26,6 +30,23 @@ interface LanyardProps {
   transparent?: boolean;
   /** Fires when the user taps the card (short press, no drag). */
   onCardClick?: () => void;
+}
+
+// Detects WebGL context loss inside the Canvas and notifies the parent.
+// Calling preventDefault() on the event tells the browser to restore the
+// context; bumping canvasKey forces a clean React remount as a fallback.
+function ContextLossRecovery({ onLost }: { onLost: () => void }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handler = (e: Event) => {
+      e.preventDefault(); // let the browser try to restore first
+      setTimeout(onLost, 500); // fallback: force remount
+    };
+    canvas.addEventListener('webglcontextlost', handler);
+    return () => canvas.removeEventListener('webglcontextlost', handler);
+  }, [gl, onLost]);
+  return null;
 }
 
 export default function Lanyard({
@@ -38,6 +59,16 @@ export default function Lanyard({
   const [isMobile, setIsMobile] = useState(
     () => typeof window !== 'undefined' && window.innerWidth < 768
   );
+  // Increment to force a full Canvas remount after WebGL context loss.
+  const [canvasKey, setCanvasKey] = useState(0);
+  // Defer Physics mount until after the Canvas has rendered its first frame
+  // so Rapier WASM is fully initialised before joints are created.
+  const [physicsReady, setPhysicsReady] = useState(false);
+
+  const handleContextLost = useCallback(() => {
+    setPhysicsReady(false);
+    setCanvasKey(k => k + 1);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -45,19 +76,45 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+    // Two RAFs: first lets the Canvas mount + WebGL context init,
+    // second lets the renderer commit one paint. After that, mounting
+    // <Physics> + <Band> is safe.
+    let id2 = 0;
+    const id1 = requestAnimationFrame(() => {
+      id2 = requestAnimationFrame(() => setPhysicsReady(true));
+    });
+    return () => {
+      cancelAnimationFrame(id1);
+      if (id2) cancelAnimationFrame(id2);
+    };
+  }, [canvasKey]);
+
   return (
     <div className="lanyard-wrapper">
       <Canvas
+        key={canvasKey}
         camera={{ position, fov }}
         dpr={[1, isMobile ? 1.5 : 2]}
-        gl={{ alpha: transparent }}
+        gl={{
+          alpha: transparent,
+          // Reduce GPU pressure on first load to avoid ANGLE/DirectX TDR
+          powerPreference: 'high-performance',
+          stencil: false,
+          antialias: false,
+        }}
         onCreated={({ gl }) => gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)}
       >
+        <ContextLossRecovery onLost={handleContextLost} />
         <ambientLight intensity={Math.PI} />
-        <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-          <Band isMobile={isMobile} onCardClick={onCardClick} />
-        </Physics>
-        <Environment blur={0.75}>
+        {physicsReady && (
+          <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
+            <Band isMobile={isMobile} onCardClick={onCardClick} />
+          </Physics>
+        )}
+        {/* resolution={64} lowers env-map cube size from 256→64, cutting GPU
+            memory and HLSL compilation work by 16x on first load */}
+        <Environment blur={0.75} resolution={64}>
           <Lightformer
             intensity={2}
             color="white"
@@ -174,29 +231,33 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, onCardClick }: Ba
         z: vec.z - (dragged as THREE.Vector3).z,
       });
     }
-    if (fixed.current) {
-      [j1, j2].forEach((ref) => {
-        if (!ref.current.lerped) {
-          ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
-        }
-        const clampedDistance = Math.max(
-          0.1,
-          Math.min(1, ref.current.lerped.distanceTo(ref.current.translation()))
-        );
-        ref.current.lerped.lerp(
-          ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
-        );
-      });
-      curve.points[0].copy(j3.current.translation());
-      curve.points[1].copy(j2.current.lerped);
-      curve.points[2].copy(j1.current.lerped);
-      curve.points[3].copy(fixed.current.translation());
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
-      ang.copy(card.current.angvel());
-      rot.copy(card.current.rotation());
-      card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
-    }
+    // Guard every ref — on first mount Rapier physics bodies may not be ready yet
+    if (
+      !fixed.current || !j1.current || !j2.current ||
+      !j3.current || !card.current || !band.current
+    ) return;
+
+    [j1, j2].forEach((ref) => {
+      if (!ref.current.lerped) {
+        ref.current.lerped = new THREE.Vector3().copy(ref.current.translation());
+      }
+      const clampedDistance = Math.max(
+        0.1,
+        Math.min(1, ref.current.lerped.distanceTo(ref.current.translation()))
+      );
+      ref.current.lerped.lerp(
+        ref.current.translation(),
+        delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
+      );
+    });
+    curve.points[0].copy(j3.current.translation());
+    curve.points[1].copy(j2.current.lerped);
+    curve.points[2].copy(j1.current.lerped);
+    curve.points[3].copy(fixed.current.translation());
+    band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32));
+    ang.copy(card.current.angvel());
+    rot.copy(card.current.rotation());
+    card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z });
   });
 
   useEffect(() => {
@@ -257,13 +318,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, onCardClick }: Ba
             }}
           >
             <mesh geometry={nodes.card.geometry}>
-              <meshPhysicalMaterial
+              {/* meshStandardMaterial avoids the expensive clearcoat GLSL
+                  variant that was triggering Windows ANGLE/HLSL TDR on load */}
+              <meshStandardMaterial
                 map={materials.base.map}
                 map-anisotropy={16}
-                clearcoat={isMobile ? 0 : 1}
-                clearcoatRoughness={0.15}
-                roughness={0.9}
+                roughness={0.3}
                 metalness={0.8}
+                envMapIntensity={1}
               />
             </mesh>
             <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />

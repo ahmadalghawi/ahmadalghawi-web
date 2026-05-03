@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { FileCode, Database, Code, Monitor, Mail, X, GitBranch, Bell, ChevronRight, Command, Menu } from 'lucide-react';
+import { FileCode, Database, Code, Monitor, Mail, BookOpen, X, GitBranch, Bell, ChevronRight, Command, Menu } from 'lucide-react';
 import LoadingScreen from './components/LoadingScreen';
 import ActivityBar from './components/ActivityBar';
 import Sidebar from './components/Sidebar';
@@ -16,6 +16,8 @@ import About from './components/sections/About';
 import Experience from './components/sections/Experience';
 import Skills from './components/sections/Skills';
 import Projects from './components/sections/Projects';
+import Blog from './components/sections/Blog';
+import BlogPost from './components/sections/BlogPost';
 import Contact from './components/sections/Contact';
 import CV from './pages/CV';
 import AdminLogin from './pages/admin/AdminLogin';
@@ -27,6 +29,7 @@ import AdminTestimonials from './pages/admin/AdminTestimonials';
 import AdminNow from './pages/admin/AdminNow';
 import AdminCV from './pages/admin/AdminCV';
 import AdminMessages from './pages/admin/AdminMessages';
+import AdminBlog from './pages/admin/AdminBlog';
 import AdminSettings from './pages/admin/AdminSettings';
 import RequireAdmin from './components/admin/RequireAdmin';
 import { AdminSettingsProvider } from './contexts/AdminSettingsContext';
@@ -40,6 +43,7 @@ const pathToSection: Record<string, SectionId> = {
   '/experience': 'experience',
   '/skills': 'skills',
   '/projects': 'projects',
+  '/blog': 'blog',
   '/contact': 'contact',
 };
 
@@ -48,6 +52,7 @@ const tabs = [
   { id: 'experience' as SectionId, path: '/experience', name: 'experience', icon: Database, ext: '.json', lang: 'JSON'             },
   { id: 'skills'     as SectionId, path: '/skills',     name: 'skills',     icon: Code,     ext: '.js',   lang: 'JavaScript'       },
   { id: 'projects'   as SectionId, path: '/projects',   name: 'projects',   icon: Monitor,  ext: '.tsx',  lang: 'TypeScript React' },
+  { id: 'blog'       as SectionId, path: '/blog',       name: 'blog',       icon: BookOpen, ext: '.md',   lang: 'Markdown'         },
   { id: 'contact'    as SectionId, path: '/contact',    name: 'contact',    icon: Mail,     ext: '.env',  lang: 'dotenv'           },
 ];
 
@@ -156,7 +161,9 @@ function App() {
     localStorage.setItem('sidebar-collapsed', sidebarCollapsed ? '1' : '0');
   }, [sidebarCollapsed]);
 
-  const activeSection: SectionId = pathToSection[location.pathname] ?? 'about';
+  const activeSection: SectionId = location.pathname.startsWith('/blog')
+    ? 'blog'
+    : pathToSection[location.pathname] ?? 'about';
 
   // Build the command list for the palette
   const commands = useMemo<PaletteCommand[]>(() => {
@@ -273,7 +280,8 @@ function App() {
     'mod+2':       (e) => { e.preventDefault(); navigate('/experience'); },
     'mod+3':       (e) => { e.preventDefault(); navigate('/skills'); },
     'mod+4':       (e) => { e.preventDefault(); navigate('/projects'); },
-    'mod+5':       (e) => { e.preventDefault(); navigate('/contact'); },
+    'mod+5':       (e) => { e.preventDefault(); navigate('/blog'); },
+    'mod+6':       (e) => { e.preventDefault(); navigate('/contact'); },
     'mod+,':       (e) => { e.preventDefault(); setSettingsOpen(true); },
   }, [navigate, settings.zenMode, update]);
 
@@ -304,6 +312,7 @@ function App() {
           <Route path="now" element={<AdminNow />} />
           <Route path="cv" element={<AdminCV />} />
           <Route path="messages" element={<AdminMessages />} />
+          <Route path="blog" element={<AdminBlog />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
@@ -395,6 +404,8 @@ function App() {
                           <Route path="/experience" element={<Experience />} />
                           <Route path="/skills" element={<Skills />} />
                           <Route path="/projects" element={<Projects />} />
+                          <Route path="/blog" element={<Blog />} />
+                          <Route path="/blog/:slug" element={<BlogPost />} />
                           <Route path="/contact" element={<Contact />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

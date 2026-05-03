@@ -68,6 +68,23 @@ export interface Message {
   userAgent?: string;
 }
 
+export interface Post {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverImage?: string;
+  coverImagePath?: string;
+  tags: string[];
+  published: boolean;
+  featured: boolean;
+  readingTime?: number; // minutes, computed
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
+}
+
 /* ─── CV page content ────────────────────────────────────────────────── */
 
 export interface CVHero {

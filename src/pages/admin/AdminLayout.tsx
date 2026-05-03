@@ -13,6 +13,7 @@ import {
   Sparkles,
   Inbox,
   FileText,
+  BookOpen,
   LogOut,
   ExternalLink,
   Settings,
@@ -29,6 +30,7 @@ const nav = [
   { to: '/admin/now',          label: 'Now',          icon: Sparkles,        end: false },
   { to: '/admin/cv',           label: 'CV',           icon: FileText,        end: false },
   { to: '/admin/messages',     label: 'Messages',     icon: Inbox,           end: false },
+  { to: '/admin/blog',         label: 'Blog',         icon: BookOpen,        end: false },
   { to: '/admin/settings',     label: 'Settings',     icon: Settings,        end: false },
 ];
 
@@ -38,7 +40,8 @@ const THEME_MAP: Record<string, {
   accentText: string; accentDot: string;
 }> = {
   dark:    { bg: 'bg-zinc-950',    text: 'text-zinc-100',    sidebarBg: 'bg-zinc-950/50',    sidebarBorder: 'border-zinc-900',    activeNav: 'bg-cyan-500/10 text-cyan-300', hoverNav: 'hover:text-zinc-200 hover:bg-zinc-900/50', inactiveNav: 'text-zinc-400', accentText: 'text-cyan-400', accentDot: 'bg-cyan-400' },
-  light:   { bg: 'bg-gray-50',     text: 'text-gray-900',    sidebarBg: 'bg-white',            sidebarBorder: 'border-gray-200',    activeNav: 'bg-blue-500/10 text-blue-700', hoverNav: 'hover:text-gray-900 hover:bg-gray-100',   inactiveNav: 'text-gray-500', accentText: 'text-blue-600', accentDot: 'bg-blue-500' },
+  light:   { bg: 'bg-slate-50',    text: 'text-slate-900',   sidebarBg: 'bg-white',            sidebarBorder: 'border-slate-200',   activeNav: 'bg-blue-500/15 text-blue-700 font-medium', hoverNav: 'hover:text-slate-900 hover:bg-slate-100', inactiveNav: 'text-slate-600', accentText: 'text-blue-600', accentDot: 'bg-blue-500' },
+  warm:    { bg: 'bg-amber-50',    text: 'text-amber-950',   sidebarBg: 'bg-orange-50/80',   sidebarBorder: 'border-amber-200',   activeNav: 'bg-orange-500/15 text-orange-800 font-medium', hoverNav: 'hover:text-amber-950 hover:bg-orange-100/60', inactiveNav: 'text-amber-800', accentText: 'text-orange-700', accentDot: 'bg-orange-500' },
   blue:    { bg: 'bg-zinc-950',    text: 'text-zinc-100',    sidebarBg: 'bg-zinc-950/50',    sidebarBorder: 'border-zinc-900',    activeNav: 'bg-blue-500/10 text-blue-300', hoverNav: 'hover:text-zinc-200 hover:bg-zinc-900/50', inactiveNav: 'text-zinc-400', accentText: 'text-blue-400', accentDot: 'bg-blue-400' },
   green:   { bg: 'bg-zinc-950',    text: 'text-zinc-100',    sidebarBg: 'bg-zinc-950/50',    sidebarBorder: 'border-zinc-900',    activeNav: 'bg-emerald-500/10 text-emerald-300', hoverNav: 'hover:text-zinc-200 hover:bg-zinc-900/50', inactiveNav: 'text-zinc-400', accentText: 'text-emerald-400', accentDot: 'bg-emerald-400' },
   purple:  { bg: 'bg-zinc-950',    text: 'text-zinc-100',    sidebarBg: 'bg-zinc-950/50',    sidebarBorder: 'border-zinc-900',    activeNav: 'bg-violet-500/10 text-violet-300', hoverNav: 'hover:text-zinc-200 hover:bg-zinc-900/50', inactiveNav: 'text-zinc-400', accentText: 'text-violet-400', accentDot: 'bg-violet-400' },

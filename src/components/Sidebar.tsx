@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { TypeAnimation } from 'react-type-animation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  FileCode, Database, Code, Monitor, Mail, Terminal as TerminalIcon, Folder,
+  FileCode, Database, Code, Monitor, Mail, BookOpen, Terminal as TerminalIcon, Folder,
   Check, RefreshCw, Plus, Search, FileText, Quote, Sparkles, Package, Loader2,
   Trash2, SquareSplitHorizontal,
 } from 'lucide-react';
 
-export type SectionId = 'about' | 'experience' | 'skills' | 'projects' | 'contact';
+export type SectionId = 'about' | 'experience' | 'skills' | 'projects' | 'contact' | 'blog';
 export type PanelId = 'explorer' | 'git' | 'ext' | 'terminal';
 
 interface FileItem {
@@ -24,6 +24,7 @@ const files: FileItem[] = [
   { id: 'experience', path: '/experience', name: 'experience', icon: Database, extension: '.json'},
   { id: 'skills',     path: '/skills',     name: 'skills',     icon: Code,     extension: '.js'  },
   { id: 'projects',   path: '/projects',   name: 'projects',   icon: Monitor,  extension: '.tsx' },
+  { id: 'blog',       path: '/blog',       name: 'blog',       icon: BookOpen, extension: '.md'  },
   { id: 'contact',    path: '/contact',    name: 'contact',    icon: Mail,     extension: '.env' },
 ];
 

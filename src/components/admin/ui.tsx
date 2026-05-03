@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode, type ButtonHTMLAttributes, type In
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Loader2, AlertTriangle } from 'lucide-react';
+import { useAdminSettings } from '../../contexts/AdminSettingsContext';
 
 /* ─── Button ───────────────────────────────────────────────────────────── */
 
@@ -262,11 +263,20 @@ export function PageHeader({
   description?: string;
   actions?: ReactNode;
 }) {
+  const { settings } = useAdminSettings();
+  const titleClass =
+    settings.theme === 'light' ? 'text-slate-900' :
+    settings.theme === 'warm'  ? 'text-amber-950' :
+                                 'text-zinc-100';
+  const descClass =
+    settings.theme === 'light' ? 'text-slate-600' :
+    settings.theme === 'warm'  ? 'text-amber-800' :
+                                 'text-zinc-500';
   return (
     <header className="flex items-center justify-between gap-4 mb-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">{title}</h1>
-        {description && <p className="text-sm text-zinc-500 mt-1">{description}</p>}
+        <h1 className={`text-2xl font-semibold tracking-tight ${titleClass}`}>{title}</h1>
+        {description && <p className={`text-sm mt-1 ${descClass}`}>{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </header>

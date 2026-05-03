@@ -6,6 +6,7 @@ const langMap: Record<SectionId, string> = {
   experience: 'JSON',
   skills: 'JavaScript',
   projects: 'TypeScript React',
+  blog: 'Markdown',
   contact: 'dotenv',
 };
 
@@ -14,6 +15,7 @@ const lineMap: Record<SectionId, string> = {
   experience: 'Ln 42, Col 1',
   skills: 'Ln 28, Col 1',
   projects: 'Ln 156, Col 1',
+  blog: 'Ln 12, Col 1',
   contact: 'Ln 8, Col 1',
 };
 

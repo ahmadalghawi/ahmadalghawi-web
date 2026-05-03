@@ -35,6 +35,8 @@ body {
 
 .terminal-body { max-height: 400px; }
 
+.reading-progress { width: var(--prog, 0%); }
+
 .backdrop-blur-terminal {
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);

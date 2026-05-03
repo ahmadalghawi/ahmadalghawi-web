@@ -1,4 +1,4 @@
-export type AdminTheme = 'dark' | 'light' | 'blue' | 'green' | 'purple';
+export type AdminTheme = 'dark' | 'light' | 'warm' | 'blue' | 'green' | 'purple';
 
 export interface AdminSettings {
   theme: AdminTheme;

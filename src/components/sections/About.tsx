@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect, useCallback, Suspense, lazy } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Terminal, FileCode, Minus, Square, X, PanelRight, PanelBottom, IdCard, ExternalLink } from 'lucide-react';
+import { Terminal, FileCode, Minus, Square, X, PanelRight, PanelBottom, IdCard, ExternalLink, BookOpen, ArrowRight } from 'lucide-react';
 import { COMMANDS, LINE_DELAY_MS } from '../../data/terminalCommands';
+import { usePosts } from '../../hooks/usePosts';
+import PostCard from '../blog/PostCard';
 
 // Lazy-load the 3D Lanyard — pulls in ~1MB of deps only when needed
 const Lanyard = lazy(() => import('../Lanyard/Lanyard'));
@@ -71,19 +73,20 @@ export default function About() {
         'experience.json': COMMANDS.experience,
         'skills.js': COMMANDS.skills,
         'projects.tsx': COMMANDS.projects,
+        'blog.md': COMMANDS.blog,
         'contact.env': COMMANDS.contact,
         'resume.pdf': COMMANDS.resume,
       };
-      output = fileMap[file] ?? [`cat: ${file}: No such file or directory`, `Available files: README.md, experience.json, skills.js, projects.tsx, contact.env, resume.pdf`];
+      output = fileMap[file] ?? [`cat: ${file}: No such file or directory`, `Available files: README.md, experience.json, skills.js, projects.tsx, blog.md, contact.env, resume.pdf`];
     } else if (cmd.startsWith('cd ')) {
       const dest = cmd.slice(3).trim();
-      const navMap: Record<string, string> = { about: '/', experience: '/experience', skills: '/skills', projects: '/projects', contact: '/contact' };
+      const navMap: Record<string, string> = { about: '/', experience: '/experience', skills: '/skills', projects: '/projects', blog: '/blog', contact: '/contact' };
       if (navMap[dest]) {
         output = [`Navigating to ${dest}...`, `> open ${navMap[dest]}`];
         // navigate after short delay
         setTimeout(() => { window.location.href = navMap[dest]; }, 900);
       } else {
-        output = [`cd: ${dest}: No such section`, 'Available: about, experience, skills, projects, contact'];
+        output = [`cd: ${dest}: No such section`, 'Available: about, experience, skills, projects, blog, contact'];
       }
     } else {
       output = extraLines ?? COMMANDS[cmd] ?? [`'${raw}' is not recognized as a command.`, 'Type "help" to see available commands.'];
@@ -175,7 +178,7 @@ export default function About() {
         </div>
 
         {/* Lanyard card — drag-to-swing 3D ID card + View CV CTA */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 overflow-hidden flex flex-col">
+        <div className="bg-linear-to-br from-gray-800 to-gray-900 rounded-lg border border-gray-700 overflow-hidden flex flex-col">
           <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-700 bg-gray-900/60">
             <IdCard className="text-cyan-400" size={16} />
             <span className="text-white text-xs font-bold tracking-wide">id-card.lanyard</span>
@@ -356,7 +359,7 @@ export default function About() {
                 {/* Quick commands hint */}
                 <div className="text-gray-500 text-xs p-3 border-t border-gray-700 flex flex-wrap gap-2 items-center bg-gray-950">
                   <span>💡</span>
-                  {['help', 'resume', 'skills', 'experience', 'projects', 'contact'].map(cmd => (
+                  {['help', 'resume', 'skills', 'experience', 'projects', 'blog', 'contact'].map(cmd => (
                     <button
                       key={cmd}
                       onClick={() => run(cmd)}
@@ -381,6 +384,36 @@ export default function About() {
           <Terminal size={12} /> Open Interactive Terminal
         </button>
       )}
+
+      <LatestPostsSection />
     </motion.div>
+  );
+}
+
+function LatestPostsSection() {
+  const { data: posts } = usePosts();
+  const latest = posts?.slice(0, 3) ?? [];
+  if (latest.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <BookOpen size={18} className="text-cyan-400" />
+          <h2 className="text-lg font-semibold text-white">Latest from the blog</h2>
+        </div>
+        <Link
+          to="/blog"
+          className="text-xs text-gray-400 hover:text-cyan-300 transition-colors inline-flex items-center gap-1"
+        >
+          View all <ArrowRight size={12} />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {latest.map((post) => (
+          <PostCard key={post.id} post={post} />
+        ))}
+      </div>
+    </div>
   );
 }
